@@ -22,34 +22,64 @@ Command-line application that does a search.
 
 
 import pprint
+import sys
+import urllib2
+import os
 
 from googleapiclient.discovery import build
 
 
 API_KEY = "AIzaSyB-HfmAFqW10Hp3nO7Vh6MX2s7LDMvRdAg"
 CSE_ID = "017448297487401808077:o0oyzopipio"
-QUERY = "lectures"
-
+QUERY = sys.argv[1]
+DOWNLOAD_FOLDER="./raw/"
 NUM_OF_PAGES = 1
 
 def main():
   service = build("customsearch", "v1",
             developerKey=API_KEY)
 
+  if not os.path.exists(DOWNLOAD_FOLDER):
+    os.makedirs(DOWNLOAD_FOLDER)
 
   for curr_page in range(0,NUM_OF_PAGES):
+    starting_index = curr_page*10 + 1
 
     res = service.cse().list(
         q=QUERY,
         cx=CSE_ID,
-        start=(curr_page*10 + 1),
+        start=starting_index,
       ).execute()
 
+
+
     if not 'items' in res:
-        print 'No result !!\nres is: {}'.format(res)
+        print 'Error: No result !!\nres is: {}'.format(res)
     else:
         for item in res['items']:
-            print('{}:\n\t{}'.format(item['title'], item['link']))
+            print(item['link'])
+            content = get_url(item['link'])
+            if(not content):
+              print("Could not retreive this site, skipping")
+              break
+            
+            save_content(content, DOWNLOAD_FOLDER+"{} - {} [{}].html".format(QUERY, starting_index, item['displayLink']))
+            starting_index += 1
+
+
+def get_url(url):
+  try:
+    res = urllib2.urlopen(url, timeout=5)
+    content = res.read()
+    return content
+
+  except urllib2.URLError as e:
+    return False
+
+def save_content(content, path):
+  f = open(path, 'w')
+  f.write(content)
+  f.close()
 
 
 if __name__ == '__main__':
