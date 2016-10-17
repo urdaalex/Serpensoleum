@@ -28,19 +28,29 @@ from googleapiclient.discovery import build
 
 API_KEY = "AIzaSyB-HfmAFqW10Hp3nO7Vh6MX2s7LDMvRdAg"
 CSE_ID = "017448297487401808077:o0oyzopipio"
+QUERY = "lectures"
+
+NUM_OF_PAGES = 1
 
 def main():
-  # Build a service object for interacting with the API. Visit
-  # the Google APIs Console <http://code.google.com/apis/console>
-  # to get an API key for your own application.
   service = build("customsearch", "v1",
             developerKey=API_KEY)
 
-  res = service.cse().list(
-      q='lectures',
-      cx=CSE_ID,
-    ).execute()
-  pprint.pprint(res)
+
+  for curr_page in range(0,NUM_OF_PAGES):
+
+    res = service.cse().list(
+        q=QUERY,
+        cx=CSE_ID,
+        start=(curr_page*10 + 1),
+      ).execute()
+
+    if not 'items' in res:
+        print 'No result !!\nres is: {}'.format(res)
+    else:
+        for item in res['items']:
+            print('{}:\n\t{}'.format(item['title'], item['link']))
+
 
 if __name__ == '__main__':
   main()
