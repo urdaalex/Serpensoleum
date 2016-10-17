@@ -25,6 +25,7 @@ import pprint
 import sys
 import urllib2
 import os
+import json
 
 from googleapiclient.discovery import build
 
@@ -61,9 +62,12 @@ def main():
             content = get_url(item['link'])
             if(not content):
               print("Could not retreive this site, skipping")
-              break
-            
-            save_content(content, DOWNLOAD_FOLDER+"{} - {} [{}].html".format(QUERY, starting_index, item['displayLink']))
+            else:
+              json_content = {}
+              json_content['url'] = item['link']
+              json_content['contents'] = content
+
+              save_content(json.dumps(json_content), DOWNLOAD_FOLDER+"{} - {} [{}].json".format(QUERY, starting_index, item['displayLink']))
             starting_index += 1
 
 
