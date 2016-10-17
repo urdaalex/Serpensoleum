@@ -61,7 +61,7 @@ def main():
             print(item['link'])
             content = get_url(item['link'])
             if(not content):
-              print("Could not retreive this site, skipping")
+              print("***Could not retreive this site, skipping***")
             else:
               json_content = {}
               json_content['url'] = item['link']
