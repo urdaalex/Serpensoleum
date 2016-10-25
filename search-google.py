@@ -31,7 +31,8 @@ from googleapiclient.discovery import build
 
 
 API_KEY = "AIzaSyB-HfmAFqW10Hp3nO7Vh6MX2s7LDMvRdAg"
-CSE_ID = "017448297487401808077:o0oyzopipio"
+CSE_ID = "017448297487401808077:o0oyzopipio" #search all sites
+#CSE_ID = "017448297487401808077:uw5linhdq6c" #schema.org limitation [MedicalEntity] - all sites
 QUERY = sys.argv[1]
 DOWNLOAD_FOLDER="./raw/"
 NUM_OF_PAGES = 1
