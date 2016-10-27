@@ -67,6 +67,7 @@ def main():
               json_content = {}
               json_content['url'] = item['link']
               json_content['contents'] = content
+              json_content['query'] = QUERY
 
               save_content(json.dumps(json_content), DOWNLOAD_FOLDER+"{} - {} [{}].json".format(QUERY, starting_index, item['displayLink']))
             starting_index += 1
