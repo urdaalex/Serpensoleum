@@ -33,6 +33,7 @@ from googleapiclient.discovery import build
 
 
 API_KEY = "AIzaSyB-HfmAFqW10Hp3nO7Vh6MX2s7LDMvRdAg"
+
 CSE_ID = "017448297487401808077:o0oyzopipio" #search all sites
 #CSE_ID = "017448297487401808077:uw5linhdq6c" #schema.org limitation [MedicalEntity] - all sites
 
@@ -74,8 +75,8 @@ def main():
             else:
               json_content = {}
               json_content['url'] = item['link']
-              json_content['contents'] = content
               json_content['query'] = QUERY
+              json_content['contents'] = content
 
               save_content(json.dumps(json_content), DOWNLOAD_FOLDER+"{} - {} [{}].json".format(QUERY, starting_index, item['displayLink']))
             starting_index += 1

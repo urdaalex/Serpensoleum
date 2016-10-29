@@ -2,9 +2,11 @@ from bs4 import BeautifulSoup
 from os import listdir
 import sys
 import os
+import re
 from os.path import isfile, join
 
 import simplejson
+import regex_helpers
 import json
 
 TAGS = ['span', 'div', 'par']
@@ -33,8 +35,13 @@ def main():
 
     for f in files:
         document = load_document(os.path.join(input_directory, f))
-        result = parse_document(document)
-        save_content(result, join(output_directory, f.strip('.json') + '.txt'))
+        query = document['query']
+        parsed_content = parse_document_tag_based(document)
+        parsed_content['query'] = query
+
+        if not os.path.exists(join(output_directory, query)):
+            os.makedirs(join(output_directory, query))
+        save_content(json.dumps(parsed_content), join(output_directory, query, f))
 
 
 def load_document(path):
@@ -55,12 +62,40 @@ def whatisthis(s):
     else:
         print "not a string"
 
-def parse_document(document):
-    result = ''
+def parse_document_tag_based(document):
+    """
+    Takes in a JSON object representing an HTML page, accesses its 'contents' tag, and parses the content. The content
+    is parsed based on HTML <p> tags. This has shown to be sufficient in some cases, though perhaps there are some
+    edge cases where certain content might not be accessible by considering only <p> tags.
+
+    :param document: A JSON object representing the result of a google search
+    :return: A JSON object with the following schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    representing the parsed contents of a website.
+    """
+    result = {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+
     # print whatisthis(document["contents"])
     soup = BeautifulSoup(document['contents'], 'html.parser')
 
     pars = soup.find_all('p')
+
+    links = soup.find_all('a')
+    images = soup.select('a[class*="image"], a[class*="pict"], a[class*="phot"]')
+
+    links = [link for link in links if link not in images]
+
+    for link in links:
+        href = link.get('href')
+        if href != None:
+            result['links'].append(href.encode('ascii', 'ignore'))
+
+    if soup.title:
+        result['title'] = soup.title.get_text().encode('ascii', 'ignore')
+    else:
+        h1s = soup.select('h1')
+        for h1 in h1s:
+            result['title'] = h1.get_text().encode('ascii', 'ignore')
+            break
 
     for element in pars:
         # if not any(True for _ in element.children):
@@ -79,10 +114,9 @@ def parse_document(document):
         #     if child.name == "img":
         #         child.clear()
         if (len(text.split(" ")) > 7):
-            result += text
-            result += '\n\n'
-            print text
-            print ''
+            if not regex_helpers.check_text_for_garbage(text.lower(), regex_helpers.GARBAGE):
+                print text
+                result['paragraphs'].append(text)
         # print element.contents
     # for tag in TAGS:
     #     for tag1 in TAGS:
@@ -97,6 +131,66 @@ def parse_document(document):
 
     return result
 
+def parse_document_regex_based(document):
+    result = {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+
+    soup = BeautifulSoup(document['contents'], 'html.parser')
+
+    body = soup.select("body *")
+
+    links = soup.find_all('a')
+    images = soup.select('a[class*="image"], a[class*="pict"], a[class*="phot"]')
+
+    links = [link for link in links if link not in images]
+
+    for link in links:
+        href = link.get('href')
+        if href != None:
+            result['links'].append(href.encode('ascii', 'ignore'))
+
+    if soup.title:
+        result['title'] = soup.title.get_text().encode('ascii', 'ignore')
+    else:
+        h1s = soup.select('h1')
+        for h1 in h1s:
+            result['title'] = h1.get_text().encode('ascii', 'ignore')
+            break
+
+    generator = (element for element in body if element.name != 'script' and element.name != 'img')
+
+    for element in generator:
+        children = element.findChildren()
+        if len(children) > 0:
+            continue
+
+        text = element.get_text().encode('ascii', 'ignore')
+
+        sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', text)
+        long_sentences = []
+
+        for sentence in sentences:
+            if len(sentence.split(" ")) > 5:
+                long_sentences.append(sentence)
+
+        paragraph = ""
+
+        for sentence in long_sentences:
+            trimmed = re.sub('\s+', ' ', sentence)
+            if trimmed != '':
+                paragraph += ' ' + trimmed
+
+        if paragraph != "":
+            result['paragraphs'].append(paragraph)
+            print paragraph
+
+    return result
+
+def peek(iterable):
+    try:
+        first = next(iterable)
+    except StopIteration:
+        return True
+    return False
 
 if __name__ == "__main__":
     main()
