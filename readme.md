@@ -3,6 +3,7 @@ Dependencies:
 1. pip install --upgrade google-api-python-client
 2. pip install BeautifulSoup
 3. pip install simplejson
+4. pip install nltk
 
 
 Usage:
