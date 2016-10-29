@@ -17,6 +17,8 @@
 
 """Simple command-line example for Custom Search.
 Command-line application that does a search.
+
+Usage search-python QUERY [OUTPUT_FOLDER]
 """
 
 
@@ -33,8 +35,14 @@ from googleapiclient.discovery import build
 API_KEY = "AIzaSyB-HfmAFqW10Hp3nO7Vh6MX2s7LDMvRdAg"
 CSE_ID = "017448297487401808077:o0oyzopipio" #search all sites
 #CSE_ID = "017448297487401808077:uw5linhdq6c" #schema.org limitation [MedicalEntity] - all sites
+
 QUERY = sys.argv[1]
-DOWNLOAD_FOLDER="./raw/"
+
+if len(sys.argv) != 3:
+  DOWNLOAD_FOLDER="./raw/"
+else:
+  DOWNLOAD_FOLDER= "./" + sys.argv[2] + "/"
+
 NUM_OF_PAGES = 1
 
 def main():
@@ -62,7 +70,7 @@ def main():
             print(item['link'])
             content = get_url(item['link'])
             if(not content):
-              print("***Could not retreive this site, skipping***")
+              print("***Could not retreive above site, skipping***")
             else:
               json_content = {}
               json_content['url'] = item['link']
