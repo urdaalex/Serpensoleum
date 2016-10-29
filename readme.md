@@ -13,4 +13,4 @@ search-google.py QUERY [FOLDER_NAME]
 ```
 categorize-results.py FOLDER_NAME
 ```
-* takes all results in folder and opens URL in browser for you to categorize website
+* takes all results in folder and opens URL in browser for you to categorize website (note: folder must have been create by search-google.py)
