@@ -4,6 +4,7 @@ Dependencies:
 2. pip install BeautifulSoup
 3. pip install simplejson
 4. pip install nltk
+5. pip install --upgrade gensim
 
 
 Usage:
