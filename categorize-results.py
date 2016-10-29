@@ -6,10 +6,10 @@ import json
 import webbrowser
 
 FOLDER = "./" + sys.argv[1] + "/"
-VALID_CATEGORIES = ['f', 'a']
+VALID_CATEGORIES = ['f', 'a', 'u', 'n']
 def main():
 	print("Enter the category of this search (don't pick 'q') ")
-	expected = get_category()
+	expected = get_expected_category()
 
 	for fn in listdir_path(FOLDER):
 		print("")
@@ -39,13 +39,22 @@ def listdir_path(d):
 
 def open_url(url):
 	print("Opening " + url)
-	webbrowser.open(url, new=2, autoraise=True)
+	webbrowser.open(url, new=2, autoraise=False)
+
+def get_expected_category():
+	res = raw_input("Input: [f]ake, [a]ccredited. [u]nbiased \t")
+	
+	while (res not in VALID_CATEGORIES):
+		res = raw_input("Incorrect input...choose [f]ake, [a]ccredited. [u]nbiased  \t")
+
+	return res
+
 
 def get_category():
-	res = raw_input("Input: [f]ake, [a]ccredited. q to skip \t")
+	res = raw_input("Input: [f]ake, [a]ccredited, [n]ot relevant. q to skip \t")
 	
 	while (res not in VALID_CATEGORIES and res != "q"):
-		res = raw_input("Incorrect input...choose [f]ake, [a]ccredited. q to skip \t")
+		res = raw_input("Incorrect input...choose [f]ake, [a]ccredited, [n]ot relevant. q to skip \t")
 
 	return res
 

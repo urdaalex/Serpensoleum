@@ -34,8 +34,8 @@ from googleapiclient.discovery import build
 
 API_KEY = "AIzaSyB-HfmAFqW10Hp3nO7Vh6MX2s7LDMvRdAg"
 
-CSE_ID = "017448297487401808077:o0oyzopipio" #search all sites
-#CSE_ID = "017448297487401808077:uw5linhdq6c" #schema.org limitation [MedicalEntity] - all sites
+#CSE_ID = "017448297487401808077:o0oyzopipio" #search all sites
+CSE_ID = "017448297487401808077:uw5linhdq6c" #schema.org limitation [MedicalEntity] - all sites
 
 QUERY = sys.argv[1]
 
@@ -44,7 +44,7 @@ if len(sys.argv) != 3:
 else:
   DOWNLOAD_FOLDER= "./" + sys.argv[2] + "/"
 
-NUM_OF_PAGES = 1
+NUM_OF_PAGES = 6
 
 def main():
   service = build("customsearch", "v1",
@@ -78,7 +78,10 @@ def main():
               json_content['query'] = QUERY
               json_content['contents'] = content
 
-              save_content(json.dumps(json_content), DOWNLOAD_FOLDER+"{} - {} [{}].json".format(QUERY, starting_index, item['displayLink']))
+              try:
+                save_content(json.dumps(json_content), DOWNLOAD_FOLDER+"{} - {} [{}].json".format(QUERY, starting_index, item['displayLink']))
+              except UnicodeDecodeError as e:
+                print("**********ERROR DECODING, skipping above url****************\n\n")
             starting_index += 1
 
 
@@ -89,6 +92,8 @@ def get_url(url):
     return content
 
   except urllib2.URLError as e:
+    return False
+  except:
     return False
 
 def save_content(content, path):
