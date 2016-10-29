@@ -1,7 +1,7 @@
 Dependencies:
-pip install --upgrade google-api-python-client
 
-pip install BeautifulSoup
+1. pip install --upgrade google-api-python-client
+2. pip install BeautifulSoup
 
 
 Usage:
