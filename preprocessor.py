@@ -1,5 +1,4 @@
 from nltk.stem.lancaster import LancasterStemmer
-import re
 from string import punctuation
 
 '''
