@@ -127,9 +127,11 @@ def parse_document_tag_based(document):
         #     if child.name == "img":
         #         child.clear()
         if (len(text.split(" ")) > 5):
-            if not regex_helpers.check_text_for_garbage(text.lower(), regex_helpers.GARBAGE):
+            if not regex_helpers.check_text_for_garbage(text.lower(), regex_helpers.GARBAGE) and \
+                regex_helpers.check_ends_with_punctuation(text):
                 text = re.sub('\s+', ' ', text)
                 # print text
+                # print ""
                 num_words += len(text.split(' '))
                 result['paragraphs'].append(text)
         # print element.contents
@@ -191,21 +193,19 @@ def parse_document_regex_based(document):
         text = element.get_text().encode('ascii', 'ignore')
 
         sentences = re.split(regex_helpers.PARAGRAPH_SPLITTING_PATTERN, text)
-        long_sentences = []
-
-        for sentence in sentences:
-            long_sentences.append(sentence)
 
         paragraph = ""
 
-        for sentence in long_sentences:
+        for sentence in sentences:
             trimmed = re.sub('\s+', ' ', sentence)
-            if trimmed != '':
+            if trimmed != '' and regex_helpers.check_ends_with_punctuation(trimmed) and not \
+                    regex_helpers.check_text_for_garbage(trimmed, regex_helpers.GARBAGE):
                 paragraph += ' ' + trimmed
 
-        if paragraph != "" and len(paragraph.split(' ')) > 5:
+        if paragraph != "" and len(paragraph.split(' ')) > 5 :
             result['paragraphs'].append(paragraph)
             # print paragraph
+            # print ""
             num_words += len(paragraph.split(' '))
 
     if num_words < 150:
