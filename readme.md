@@ -2,6 +2,7 @@ Dependencies:
 
 1. pip install --upgrade google-api-python-client
 2. pip install BeautifulSoup
+3. pip install simplejson
 
 
 Usage:
@@ -9,7 +10,7 @@ Usage:
 search-google.py QUERY [FOLDER_NAME]
 ```
 
- * saves search results to json file: {url: "", content: ""} 
+ * saves search results to json file: {url: "", content: ""}
 ```
 categorize-results.py FOLDER_NAME
 ```
