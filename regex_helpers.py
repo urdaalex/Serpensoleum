@@ -3,6 +3,7 @@ import re
 URL_PATTERN = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 PHONE_NUMBER_PATTERN = u'(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})'
 COPYRIGHT_PATTERN = r"""copyright|right"""
+PARAGRAPH_SPLITTING_PATTERN = r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s'
 
 
 GARBAGE = [PHONE_NUMBER_PATTERN, COPYRIGHT_PATTERN]

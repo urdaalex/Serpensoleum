@@ -19,14 +19,20 @@ def main():
     parses paragraphs, and stores an empty text file with the same corresponding name but different extension
     in the output directory.
     """
-    if len(sys.argv) < 3 or not type(sys.argv[1]) is str or not type(sys.argv[2]) is str:
+    if len(sys.argv) < 4 or not type(sys.argv[1]) is str or not type(sys.argv[2]) is str or not type(sys.argv[3]) is str:
         print "Incorrect number of args or args not of type string."
         print 'Correct usage is:'
-        print 'python parser.py "input_dir_name" "output_dir_name"'
+        print 'python parser.py -method "input_dir_name" "output_dir_name"'
+        print 'Where method is either regex or tag'
+        print 'For example:: python parser.py -tag "raw" "parsed"'
         exit()
 
-    input_directory = sys.argv[1]
-    output_directory = sys.argv[2]
+    method = sys.argv[1]
+    input_directory = sys.argv[2]
+    output_directory = sys.argv[3]
+
+
+    parse_function = parse_document_tag_based if method == '-tag' else parse_document_regex_based
 
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
@@ -36,7 +42,8 @@ def main():
     for f in files:
         document = load_document(os.path.join(input_directory, f))
         query = document['query']
-        parsed_content = parse_document_tag_based(document)
+
+        parsed_content = parse_function(document)
 
         if parsed_content is None:
             continue
@@ -119,10 +126,10 @@ def parse_document_tag_based(document):
         # for child in element.children:
         #     if child.name == "img":
         #         child.clear()
-        if (len(text.split(" ")) > 7):
+        if (len(text.split(" ")) > 5):
             if not regex_helpers.check_text_for_garbage(text.lower(), regex_helpers.GARBAGE):
                 text = re.sub('\s+', ' ', text)
-                print text
+                # print text
                 num_words += len(text.split(' '))
                 result['paragraphs'].append(text)
         # print element.contents
@@ -145,8 +152,8 @@ def parse_document_tag_based(document):
 def parse_document_regex_based(document):
     """
     Takes in a JSON object representing an HTML page, accesses its 'contents' tag, and parses the content. The content
-    is parsed all HTML tags that are children of <body>. Furthermore, a rule is enfored
-    edge cases where certain content might not be accessible by considering only <p> tags.
+    is parsed all HTML tags that are children of <body>. However, tags like <script> are ignored. This allows for a
+    more liberal
 
     :param document: A JSON object representing the result of a google search
     :return: A JSON object with the following schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
@@ -176,21 +183,18 @@ def parse_document_regex_based(document):
             result['title'] = h1.get_text().encode('ascii', 'ignore')
             break
 
-    generator = (element for element in body if element.name != 'script' and element.name != 'img')
+    generator = (element for element in body if element.name != 'script' and element.name != 'img' and len(element.findChildren()) == 0)
+
+    num_words = 0
 
     for element in generator:
-        children = element.findChildren()
-        if len(children) > 0:
-            continue
-
         text = element.get_text().encode('ascii', 'ignore')
 
-        sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', text)
+        sentences = re.split(regex_helpers.PARAGRAPH_SPLITTING_PATTERN, text)
         long_sentences = []
 
         for sentence in sentences:
-            if len(sentence.split(" ")) > 5:
-                long_sentences.append(sentence)
+            long_sentences.append(sentence)
 
         paragraph = ""
 
@@ -199,9 +203,13 @@ def parse_document_regex_based(document):
             if trimmed != '':
                 paragraph += ' ' + trimmed
 
-        if paragraph != "":
+        if paragraph != "" and len(paragraph.split(' ')) > 5:
             result['paragraphs'].append(paragraph)
-            print paragraph
+            # print paragraph
+            num_words += len(paragraph.split(' '))
+
+    if num_words < 150:
+        return None
 
     return result
 
