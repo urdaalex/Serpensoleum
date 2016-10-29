@@ -37,6 +37,10 @@ def main():
         document = load_document(os.path.join(input_directory, f))
         query = document['query']
         parsed_content = parse_document_tag_based(document)
+
+        if parsed_content is None:
+            continue
+
         parsed_content['query'] = query
 
         if not os.path.exists(join(output_directory, query)):
@@ -97,6 +101,8 @@ def parse_document_tag_based(document):
             result['title'] = h1.get_text().encode('ascii', 'ignore')
             break
 
+    num_words = 0
+
     for element in pars:
         # if not any(True for _ in element.children):
         # for child in element.children:
@@ -115,7 +121,9 @@ def parse_document_tag_based(document):
         #         child.clear()
         if (len(text.split(" ")) > 7):
             if not regex_helpers.check_text_for_garbage(text.lower(), regex_helpers.GARBAGE):
+                text = re.sub('\s+', ' ', text)
                 print text
+                num_words += len(text.split(' '))
                 result['paragraphs'].append(text)
         # print element.contents
     # for tag in TAGS:
@@ -129,9 +137,21 @@ def parse_document_tag_based(document):
     # text = soup.get_text()
     # print text.encode('utf-8')
 
+    if num_words < 100:
+        return None
+
     return result
 
 def parse_document_regex_based(document):
+    """
+    Takes in a JSON object representing an HTML page, accesses its 'contents' tag, and parses the content. The content
+    is parsed all HTML tags that are children of <body>. Furthermore, a rule is enfored
+    edge cases where certain content might not be accessible by considering only <p> tags.
+
+    :param document: A JSON object representing the result of a google search
+    :return: A JSON object with the following schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    representing the parsed contents of a website.
+    """
     result = {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
 
     soup = BeautifulSoup(document['contents'], 'html.parser')
