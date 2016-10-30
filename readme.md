@@ -1,4 +1,4 @@
-Dependencies:
+## Dependencies:
 
 1. pip install --upgrade google-api-python-client
 2. pip install BeautifulSoup
@@ -13,7 +13,7 @@ Dependencies:
 5. pip install --upgrade gensim
 
 
-Usage:
+## Usage:
 ```
 search-google.py QUERY [FOLDER_NAME]
 ```
