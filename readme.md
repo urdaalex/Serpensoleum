@@ -47,7 +47,8 @@ as parser.py
 ```
 Dependency.py 
 ```
-* #USAGE:
+
+* USAGE:
 
  compare_pages(txt1,txt2)
      txt1: string of sentences seperated by newline characters.
