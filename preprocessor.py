@@ -60,7 +60,7 @@ def spaceOutTxt(txt, sofar=0):
         new_txt = ''
         for split_word in split_up[:-1]:
                 new_txt += split_word + ' ' + punctuation[sofar]
-        new_txt += split_up[-1]
+        new_txt += ' ' split_up[-1]
         return spaceOutTxt(new_txt, sofar+1)
 
     else:
