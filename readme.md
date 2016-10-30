@@ -12,6 +12,7 @@
         *Corpora* tab, and scroll down to stopwords (the identifier is *stopwords*, the corpus name is *Stopwords Corpus*), that's the one you want to download.
 5. pip install --upgrade gensim
 6. pip install cPickle
+7. Download and untar Stanford Parser `http://nlp.stanford.edu/software/lex-parser.shtml`
 
 
 ## Usage
@@ -47,23 +48,30 @@ as parser.py
 Dependency.py 
 ```
 * #USAGE:
-```
-  compare_pages(txt1,txt2)
+
+ compare_pages(txt1,txt2)
      txt1: string of sentences seperated by newline characters.
      txt2: string of sentences sperated by new line characters
-```
 
+---------
    
 RETURNS:
 	For every conflicting sentence (in the other document):
 
   
-```
-	CONFLICT!: 
-  		furthermore, there are literally hundreds of independent studies that prove vaccines cause autism.
-		vaccines do not cause autism.
 
-	CONFLICT!: 
-		there is absolutely undeniable scientific proof that vaccines cause autism.
-		vaccines do not cause autism.
-```
+CONFLICT!:
+  		
+<b>Sentence 1: </b> `furthermore, there are literally hundreds of independent studies that prove vaccines cause autism.`
+
+<b>Sentence 2: </b> `vaccines do not cause autism.`
+
+CONFLICT!:
+
+<b>Sentence 1: </b> `there is absolutely undeniable scientific proof that vaccines cause autism.`
+
+<b>Sentence 2: </b> `vaccines do not cause autism.`
+
+---------
+
+
