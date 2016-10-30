@@ -7,7 +7,7 @@ import os
 
 '''
 Notes on the implementation
-    1) I inject a space between any punctuation and the last character
+    -   I inject a space between any punctuation and the last character
         before and after it - this is done in order for the stemmer to accurately
         be able to stem the word. If we have x = 'maximum?' and we try
         to stem x, we'll get x back unaltered. If, however, x = 'maximum',
