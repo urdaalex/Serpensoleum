@@ -8,8 +8,8 @@ Dependencies:
         go into the python shell and run the following commands
         </br> `import nltk` </br>
         `nltk.download()` </br>
-        This will open a new prompt window, in that window, go to the
-        'Corpora' tab, and scroll down to stopwords, that's the one you want to download.
+        This will open a new prompt window (the *NLTK Downloader*), in that window, go to the
+        *Corpora* tab, and scroll down to stopwords (the identifier is *stopwords*, the corpus name is *Stopwords Corpus*), that's the one you want to download.
 5. pip install --upgrade gensim
 
 
