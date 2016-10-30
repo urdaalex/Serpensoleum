@@ -1,10 +1,10 @@
-## Dependencies:
+## Dependencies
 
 1. pip install --upgrade google-api-python-client
 2. pip install BeautifulSoup
 3. pip install simplejson
 4. pip install nltk
-    - **NOTE**: this won't downloads stop words, to get them you need to
+    - **NOTE**: this won't download stop words, to get them you need to
         go into the python shell and run the following commands
         </br> `import nltk` </br>
         `nltk.download()` </br>
@@ -13,7 +13,7 @@
 5. pip install --upgrade gensim
 
 
-## Usage:
+## Usage
 ```
 search-google.py QUERY [FOLDER_NAME]
 ```
