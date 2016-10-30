@@ -31,8 +31,18 @@ def main():
     input_directory = sys.argv[2]
     output_directory = sys.argv[3]
 
-
-    parse_function = parse_document_tag_based if method == '-tag' else parse_document_regex_based
+    if method == '-tag':
+        parse_function = parse_document_tag_based
+    elif method == '-regex_sent':
+        parse_function = parse_document_regex_based_sentences
+    elif method == '-regex_par':
+        parse_function = parse_document_regex_based_paragraphs
+    else:
+        print 'Incorrect method: ' + method + ' specified.'
+        print 'Please use one of the following flags:'
+        print '-tag'
+        print '-regex_sent'
+        print '-regex_par'
 
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
@@ -151,7 +161,7 @@ def parse_document_tag_based(document):
 
     return result
 
-def parse_document_regex_based(document):
+def parse_document_regex_based_paragraphs(document):
     """
     Takes in a JSON object representing an HTML page, accesses its 'contents' tag, and parses the content. The content
     is parsed all HTML tags that are children of <body>. However, tags like <script> are ignored. This allows for a
@@ -207,6 +217,63 @@ def parse_document_regex_based(document):
             # print paragraph
             # print ""
             num_words += len(paragraph.split(' '))
+
+    if num_words < 150:
+        return None
+
+    return result
+
+def parse_document_regex_based_sentences(document):
+    """
+    Takes in a JSON object representing an HTML page, accesses its 'contents' tag, and parses the content. The content
+    is parsed all HTML tags that are children of <body>. However, tags like <script> are ignored. This allows for a
+    more liberal
+
+    :param document: A JSON object representing the result of a google search
+    :return: A JSON object with the following schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    representing the parsed contents of a website.
+    """
+    result = {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+
+    soup = BeautifulSoup(document['contents'], 'html.parser')
+
+    body = soup.select("body *")
+
+    links = soup.find_all('a')
+    images = soup.select('a[class*="image"], a[class*="pict"], a[class*="phot"]')
+
+    links = [link for link in links if link not in images]
+
+    for link in links:
+        href = link.get('href')
+        if href != None:
+            result['links'].append(href.encode('ascii', 'ignore'))
+
+    if soup.title:
+        result['title'] = soup.title.get_text().encode('ascii', 'ignore')
+    else:
+        h1s = soup.select('h1')
+        for h1 in h1s:
+            result['title'] = h1.get_text().encode('ascii', 'ignore')
+            break
+
+    generator = (element for element in body if element.name != 'script' and element.name != 'img' and len(element.findChildren()) == 0)
+
+    num_words = 0
+
+    for element in generator:
+        text = element.get_text().encode('ascii', 'ignore')
+
+        sentences = re.split(regex_helpers.PARAGRAPH_SPLITTING_PATTERN, text)
+
+        for sentence in sentences:
+            trimmed = re.sub('\s+', ' ', sentence)
+            len_trimmed = len(trimmed)
+            if trimmed != '' and regex_helpers.check_ends_with_punctuation(trimmed) and not \
+                    regex_helpers.check_text_for_garbage(trimmed, regex_helpers.GARBAGE) and \
+                    len_trimmed > 5:
+                result['paragraphs'].append(trimmed)
+                num_words += len_trimmed
 
     if num_words < 150:
         return None
