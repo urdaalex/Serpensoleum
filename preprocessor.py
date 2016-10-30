@@ -127,7 +127,7 @@ def main(argv):
         with open(argv[0] + filename, 'r') as json_file:
             JSON_files.append((filename, simplejson.load(json_file)))
 
-    # Process the
+    # Process the paragraphs in the JSON files
     for (filename,unprocd_json) in JSON_files:
         unprocd_json['paragraphs'] = getProcessedDocument(unprocd_json)
 
@@ -136,8 +136,6 @@ def main(argv):
     for (filename, procd_json) in JSON_files:
         with open(argv[1] + "/" + filename, "w") as out_file:
             simplejson.dump(procd_json, out_file)
-
-
 
 if __name__ == "__main__":
     main(sys.argv[1:])
