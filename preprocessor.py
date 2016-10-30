@@ -1,6 +1,9 @@
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.corpus import stopwords
 from string import punctuation
+import simplejson
+import sys
+import os
 
 '''
 Notes on the implementation
@@ -41,7 +44,7 @@ def getProcessedDocument(article_dict):
         # Add the processed paragraph to the new paragraphs list
         new_paragraphs.append(stemmed_paragraph)
 
-    article_dict['paragraphs'] = new_paragraphs
+    return new_paragraphs
 
 def spaceOutTxt(txt, sofar=0):
     '''
@@ -79,7 +82,7 @@ def removeStopWords(txt):
 
 def stemTxt(txt, st):
     '''
-    Given a string input 'txt', this function applies stems the input
+    Given a string input 'txt', this function stems the input
     using the stemmer specified by 'st'.
     '''
     # Stem the words in the txt
@@ -90,3 +93,49 @@ def stemTxt(txt, st):
     for i in stemmed_list[:-1]:
         stemmed_paragraph += i + ' '
     return stemmed_paragraph + stemmed_list[-1]
+
+def validInputs(input_list):
+    '''
+    Given the list of input arguments, this function will return a boolean
+    indicating whether or not the inputs are valid
+    '''
+    proper_usage = "Incorrect number of args or input dir does not exist or output dir already exists\n" +\
+                "Correct usage: \n" +\
+                "\t python preprocessor.py 'input_dir_name' 'output_dir_name'"
+
+    if (len(input_list) != 2 or not os.path.exists(input_list[0]) or os.path.exists(input_list[1])):
+        print proper_usage
+        return False
+
+    return True
+
+def main(argv):
+    '''
+    Given the array of arguments to the program, the main method will ensure
+    that the inputs are valid, if they are, the JSON files in the input
+    directory will be loaded, and fully preprocessed. The processed
+    JSON files will then be saved to the output directory specified by the
+    input arguments
+    '''
+    # Check if the input arguments are valid
+    if not validInputs(argv):
+        sys.exit(1)
+
+    # Load a list of the JSON files in the input dir
+    JSON_files = []
+    for filename in os.listdir(argv[0]):
+        with open(argv[0] + filename, 'r') as json_file:
+            JSON_files.append((filename, simplejson.load(json_file)))
+
+    # Process the paragraphs in the JSON files
+    for (filename,unprocd_json) in JSON_files:
+        unprocd_json['paragraphs'] = getProcessedDocument(unprocd_json)
+
+    # Dump the new json files in the output directory
+    os.makedirs(argv[1])
+    for (filename, procd_json) in JSON_files:
+        with open(argv[1] + "/" + filename, "w") as out_file:
+            simplejson.dump(procd_json, out_file)
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
