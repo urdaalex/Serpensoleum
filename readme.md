@@ -11,6 +11,7 @@
         This will open a new prompt window (the *NLTK Downloader*), in that window, go to the
         *Corpora* tab, and scroll down to stopwords (the identifier is *stopwords*, the corpus name is *Stopwords Corpus*), that's the one you want to download.
 5. pip install --upgrade gensim
+6. pip install cPickle
 
 
 ## Usage
