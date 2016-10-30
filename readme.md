@@ -4,6 +4,12 @@ Dependencies:
 2. pip install BeautifulSoup
 3. pip install simplejson
 4. pip install nltk
+    - **NOTE**: this won't downloads stop words, to get them you need to
+        go into the python shell and run the following commands
+        </br> `import nltk` </br>
+        `nltk.download()` </br>
+        This will open a new prompt window, in that window, go to the
+        'Corpora' tab, and scroll down to stopwords, that's the one you want to download.
 5. pip install --upgrade gensim
 
 

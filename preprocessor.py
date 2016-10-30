@@ -1,4 +1,5 @@
 from nltk.stem.lancaster import LancasterStemmer
+from nltk.corpus import stopwords
 from string import punctuation
 
 '''
@@ -10,12 +11,13 @@ Notes on the implementation
         then stemming x will yield 'maxim' which is what we want.
 '''
 
-def getStemmedDocument(article_dict):
+def getProcessedDocument(article_dict):
     '''
     Given a dictionary in format returned from parser.py, this function
     replaces the paragraphs in the paragraphs list (i.e. the body of
     the parsed article) with the stemmed version of those paragraphs
-    (using the Lancaster Stemming Algorithm)
+    (using the Lancaster Stemming Algorithm), and removes the stop
+    words in the paragraphs.
     '''
     # Init the stemmer
     st = LancasterStemmer()
@@ -35,9 +37,12 @@ def getStemmedDocument(article_dict):
         # Get the spaced out version of the unstemmed paragraph
         spaced_out = spaceOutTxt(unstemmed_paragraph)
 
+        # Remove all stop words from spaced out paragraph
+        without_stopwords = removeStopWords(spaced_out)
+
         # Stem every item in the list split by spaces of the
         # spaced_out string
-        stemmed_list = [st.stem(i) for i in spaced_out.split(' ')]
+        stemmed_list = [st.stem(i) for i in without_stopwords.split(' ')]
 
         # Construct the stemmed paragraph by adding the items
         # in the stemmed list together with spaces
@@ -71,3 +76,27 @@ def spaceOutTxt(txt, sofar=0):
 
     else:
         return spaceOutTxt(txt, sofar+1)
+
+def removeStopWords(txt):
+    '''
+    Given a string input 'txt', this function removes all
+    occurences of stop words in the text
+    '''
+    # Filter out the stop words
+    filtered = [word for word in txt.split(' ') if word not in stopwords.words('english')]
+
+    # Reconstruct & return the string from the filtered list
+    txt = ''
+    for word in filtered[:-1]:
+        txt += word + ' '
+    return txt + filtered[-1]
+
+
+if __name__ == "__main__":
+    x = 'hello?! my, dear... friend & his friend: mike. Lets go biking on \
+    Wednesday evening, I love biking because its hella awesome, love this shit'
+
+    temp = {'paragraphs': [x]}
+    print spaceOutTxt(x)
+    getProcessedDocument(temp)
+    print temp['paragraphs'][0]
