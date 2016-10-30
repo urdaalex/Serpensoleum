@@ -33,6 +33,6 @@ parser.py -method [INPUT_FOLDER_NAME] [OUTPUT_FOLDER_NAME]
 preprocessor.py [INPUT_FOLDER_NAME] [OUTPUT_FOLDER_NAME]
 ```
 * This program will iterate over the JSON files produced by parser.py in the specified
-input directory, and will process the paragraph in the JSON files. The new processed
+input directory, and will process the paragraphs in the JSON files. The new processed
 JSON data will get written to the specified output folder in the same format
 as parser.py
