@@ -22,37 +22,23 @@ def getProcessedDocument(article_dict):
     # Init the stemmer
     st = LancasterStemmer()
 
-    # Get the paragraphs of the article & init a list of
-    # new paragraphs (stemmed and processed versions of
+    # Init a list of new paragraphs (processed versions of
     # old paragraphs)
-    old_paragraphs = article_dict['paragraphs']
     new_paragraphs = []
 
     # Stem each paragraph and replace it with the unstemmed in
     # the article dictionary
-    for i in range(len(old_paragraphs)):
-        # Get the unstemmed paragraph
-        unstemmed_paragraph = old_paragraphs[i]
-
-        # Get the spaced out version of the unstemmed paragraph
-        spaced_out = spaceOutTxt(unstemmed_paragraph)
+    for unprocessed_paragraph in article_dict['paragraphs']:
+        # Get the spaced out version of the unprocessed paragraph
+        spaced_out = spaceOutTxt(unprocessed_paragraph)
 
         # Remove all stop words from spaced out paragraph
         without_stopwords = removeStopWords(spaced_out)
 
-        # Stem every item in the list split by spaces of the
-        # spaced_out string
-        stemmed_list = [st.stem(i) for i in without_stopwords.split(' ')]
+        # Apply Lancaster Stemming
+        stemmed_paragraph = stemTxt(without_stopwords, st)
 
-        # Construct the stemmed paragraph by adding the items
-        # in the stemmed list together with spaces
-        stemmed_paragraph = ''
-        for i in stemmed_list[:-1]:
-            stemmed_paragraph += i + ' '
-        stemmed_paragraph += stemmed_list[-1]
-
-        # Replace the unstemmed paragraph with the stemmed paragraph
-        # in the paragraphs array
+        # Add the processed paragraph to the new paragraphs list
         new_paragraphs.append(stemmed_paragraph)
 
     article_dict['paragraphs'] = new_paragraphs
@@ -91,12 +77,16 @@ def removeStopWords(txt):
         txt += word + ' '
     return txt + filtered[-1]
 
+def stemTxt(txt, st):
+    '''
+    Given a string input 'txt', this function applies stems the input
+    using the stemmer specified by 'st'.
+    '''
+    # Stem the words in the txt
+    stemmed_list = [st.stem(i) for i in txt.split(' ')]
 
-if __name__ == "__main__":
-    x = 'hello?! my, dear... friend & his friend: mike. Lets go biking on \
-    Wednesday evening, I love biking because its hella awesome, love this shit'
-
-    temp = {'paragraphs': [x]}
-    print spaceOutTxt(x)
-    getProcessedDocument(temp)
-    print temp['paragraphs'][0]
+    # Reconstruct & return the string from the stemmed list
+    stemmed_paragraph = ''
+    for i in stemmed_list[:-1]:
+        stemmed_paragraph += i + ' '
+    return stemmed_paragraph + stemmed_list[-1]
