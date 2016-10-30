@@ -7,7 +7,7 @@ import os
 
 '''
 Notes on the implementation
-    1) I inject a space between any punctuation and the last character
+    -   I inject a space between any punctuation and the last character
         before and after it - this is done in order for the stemmer to accurately
         be able to stem the word. If we have x = 'maximum?' and we try
         to stem x, we'll get x back unaltered. If, however, x = 'maximum',
@@ -60,7 +60,7 @@ def spaceOutTxt(txt, sofar=0):
         new_txt = ''
         for split_word in split_up[:-1]:
                 new_txt += split_word + ' ' + punctuation[sofar]
-        new_txt += split_up[-1]
+        new_txt += ' ' + split_up[-1]
         return spaceOutTxt(new_txt, sofar+1)
 
     else:
@@ -124,7 +124,7 @@ def main(argv):
     # Load a list of the JSON files in the input dir
     JSON_files = []
     for filename in os.listdir(argv[0]):
-        with open(argv[0] + filename, 'r') as json_file:
+        with open(os.path.join(argv[0], filename), 'r') as json_file:
             JSON_files.append((filename, simplejson.load(json_file)))
 
     # Process the paragraphs in the JSON files
@@ -134,7 +134,7 @@ def main(argv):
     # Dump the new json files in the output directory
     os.makedirs(argv[1])
     for (filename, procd_json) in JSON_files:
-        with open(argv[1] + "/" + filename, "w") as out_file:
+        with open(os.path.join(argv[1], filename), "w") as out_file:
             simplejson.dump(procd_json, out_file)
 
 if __name__ == "__main__":
