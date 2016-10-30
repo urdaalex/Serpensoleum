@@ -42,3 +42,28 @@ preprocessor.py [INPUT_FOLDER_NAME] [OUTPUT_FOLDER_NAME]
 input directory, and will process the paragraphs in the JSON files. The new processed
 JSON data will get written to the specified output folder in the same format
 as parser.py
+
+```
+Dependency.py 
+```
+* #USAGE:
+```
+  compare_pages(txt1,txt2)
+     txt1: string of sentences seperated by newline characters.
+     txt2: string of sentences sperated by new line characters
+```
+
+   
+RETURNS:
+	For every conflicting sentence (in the other document):
+
+  
+```
+	CONFLICT!: 
+  		furthermore, there are literally hundreds of independent studies that prove vaccines cause autism.
+		vaccines do not cause autism.
+
+	CONFLICT!: 
+		there is absolutely undeniable scientific proof that vaccines cause autism.
+		vaccines do not cause autism.
+```
