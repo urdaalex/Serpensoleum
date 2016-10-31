@@ -4,16 +4,22 @@
 2. pip install BeautifulSoup
 3. pip install simplejson
 4. pip install nltk
-    - **NOTE**: this won't download stop words, to get them you need to
+    - **NOTE 1**: this won't download stop words, to get them you need to
         go into the python shell and run the following commands
         </br> `import nltk` </br>
         `nltk.download()` </br>
         This will open a new prompt window (the *NLTK Downloader*), in that window, go to the
         *Corpora* tab, and scroll down to stopwords (the identifier is *stopwords*, the corpus name is *Stopwords Corpus*), that's the one you want to download.
+    - **NOTE 2**: this won't download the *punkt* model we need for sentence parsing, so again
+        go into the python shell and run the following commands
+        </br> `import nltk` </br>
+        `nltk.download()` </br>
+        This will open a new prompt window (the *NLTK Downloader*), in that window, go to the
+        *Models* tab, and scroll down to punkt (the identifier is *punkt*, the name is *Punkt Tokenizer Models*), that's the one you want to download.
 5. pip install --upgrade gensim
 6. pip install cPickle
 7. Download and untar Stanford Parser `http://nlp.stanford.edu/software/lex-parser.shtml`
-8. pip install logging 
+8. pip install logging
 
 
 ## Usage
