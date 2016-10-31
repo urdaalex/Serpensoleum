@@ -3,6 +3,9 @@ import os
 import cPickle as pickle
 import simplejson
 from gensim.models import Word2Vec as w2v
+import logging
+
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 '''
 Notes on the implementation
@@ -45,7 +48,7 @@ def getWord2Vec(JSON_files):
     # Generate the model, the number of words/characters in the vocabulary
     # will be the number of unique words in the txt_list.
     model = w2v(all_documents,
-                min_count = len(set([i for i in [j for j in txt_list]])),
+                min_count = len(set([i for i in [j for j in all_documents]])),
                 size = 100,
                 workers = 4)
     return model
@@ -88,7 +91,7 @@ def main(argv):
     # Load a list of the JSON files in the input dir
     JSON_files = []
     for filename in os.listdir(argv[0]):
-        with open(os.path.join(argv[0], filename) 'r') as json_file:
+        with open(os.path.join(argv[0], filename), 'r') as json_file:
             JSON_files.append(simplejson.load(json_file))
 
     # Get the feature vectors of the JSON files using the method
