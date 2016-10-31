@@ -28,6 +28,7 @@ import sys
 import urllib2
 import os
 import json
+import traceback
 
 from googleapiclient.discovery import build
 
@@ -37,6 +38,7 @@ API_KEY = "AIzaSyB-HfmAFqW10Hp3nO7Vh6MX2s7LDMvRdAg"
 CSE_ID = "017448297487401808077:o0oyzopipio" #search all sites
 #CSE_ID = "017448297487401808077:uw5linhdq6c" #schema.org limitation [MedicalEntity] - all sites
 #CSE_ID = "017448297487401808077:wklbk_lctfa" #blogs only
+#CSE_ID = "017448297487401808077:wnqqxbff81o" #HONCode replica
 
 QUERY = sys.argv[1]
 
@@ -45,7 +47,7 @@ if len(sys.argv) != 3:
 else:
   DOWNLOAD_FOLDER= "./" + sys.argv[2] + "/"
 
-NUM_OF_PAGES = 3
+NUM_OF_PAGES = 5
 
 def main():
   service = build("customsearch", "v1",
@@ -87,14 +89,24 @@ def main():
 
 
 def get_url(url):
+  fake_hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+       'Accept-Encoding': 'none',
+       'Accept-Language': 'en-US,en;q=0.8',
+       'Connection': 'keep-alive'}
+  req = urllib2.Request(url, headers=fake_hdr)
+
   try:
-    res = urllib2.urlopen(url, timeout=5)
+    res = urllib2.urlopen(req, timeout=5)
     content = res.read()
     return content
 
   except urllib2.URLError as e:
+    traceback.print_exc()
     return False
   except:
+    traceback.print_exc()
     return False
 
 def save_content(content, path):

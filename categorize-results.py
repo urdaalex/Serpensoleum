@@ -11,8 +11,11 @@ def main():
 	print("Enter the category of this search (don't pick 'q') ")
 	expected = get_expected_category()
 
+	i=1
 	for fn in listdir_path(FOLDER):
-		print("")
+		print("\n" + str(i) + "/" + str(len(listdir_path(FOLDER))))
+		i = i + 1
+
 		doc = load_document(fn)
 
 		#if doc was already categorized, skip
@@ -39,7 +42,7 @@ def listdir_path(d):
 
 def open_url(url):
 	print("Opening " + url)
-	webbrowser.open(url, new=2, autoraise=False)
+	webbrowser.open(url, new=2, autoraise=True)
 
 def get_expected_category():
 	res = raw_input("Input: [f]ake, [a]ccredited. [u]nbiased \t")
