@@ -2,6 +2,7 @@ import sys
 import os
 import cPickle as pickle
 import simplejson
+from gensim.models import Word2Vec as w2v
 
 '''
 Notes on the implementation
@@ -23,6 +24,31 @@ Notes on the implementation
     option, we generate more features than we think are relevant, then use
     mRMR to keep the important ones.
 '''
+
+def getWord2Vec(JSON_files):
+    '''
+    Given a list of JSON files that have been parsed and preprocessed, this
+    function returns a list of each document (the concatenation
+    of all the paragraphs in each JSON files) converted to word2vec.
+    '''
+    # Get a list of all the documents
+    all_documents = []
+    for json in JSON_files:
+        paragraphs = json['paragraphs']
+        document = ''
+        for i in paragraphs[:-1]:
+            document += i + "\n\n"
+        document += paragraphs[-1]
+        all_documents.append(document)
+
+
+    # Generate the model, the number of words/characters in the vocabulary
+    # will be the number of unique words in the txt_list.
+    model = w2v(all_documents,
+                min_count = len(set([i for i in [j for j in txt_list]])),
+                size = 100,
+                workers = 4)
+    return model
 
 def isValid(input_args):
     '''
@@ -46,7 +72,6 @@ def isValid(input_args):
 
     return True
 
-
 def main(argv):
     '''
     Given the array of arguments to the program, the main method will ensure
@@ -63,8 +88,14 @@ def main(argv):
     # Load a list of the JSON files in the input dir
     JSON_files = []
     for filename in os.listdir(argv[0]):
-        with open(argv[0] + filename, 'r') as json_file:
-            JSON_files.append((filename, simplejson.load(json_file)))
+        with open(os.path.join(argv[0], filename) 'r') as json_file:
+            JSON_files.append(simplejson.load(json_file))
+
+    # Get the feature vectors of the JSON files using the method
+    # specified in the input
+    if (argv[2] == '-word2vec'):
+        model = getWord2Vec(JSON_files)
+
 
 
 if __name__ == "__main__":
