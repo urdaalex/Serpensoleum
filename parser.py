@@ -287,5 +287,6 @@ def peek(iterable):
         return True
     return False
 
+
 if __name__ == "__main__":
     main()
