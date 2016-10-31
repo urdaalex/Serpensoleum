@@ -47,7 +47,7 @@ if len(sys.argv) != 3:
 else:
   DOWNLOAD_FOLDER= "./" + sys.argv[2] + "/"
 
-NUM_OF_PAGES = 1
+NUM_OF_PAGES = 5
 
 def main():
   service = build("customsearch", "v1",
