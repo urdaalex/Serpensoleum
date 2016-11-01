@@ -31,27 +31,15 @@ Notes on the implementation
     mRMR to keep the important ones.
 '''
 
-def getWord2Vec(JSON_files):
+def getWord2Vec(sentences):
     '''
-    Given a list of JSON files that have been parsed and preprocessed, this
-    function returns a list of each document (the concatenation
-    of all the paragraphs in each JSON files) converted to word2vec.
+    Given a list of sentences (where each sentence is a list of all the
+    words/characters in it), this function returns the word2vec representation
     '''
-    # Get a list of all the documents
-    all_documents = []
-    for json in JSON_files:
-        paragraphs = json['paragraphs']
-        document = ''
-        for i in paragraphs[:-1]:
-            document += i + "\n\n"
-        document += paragraphs[-1]
-        all_documents.append(document)
-
-
     # Generate the model, the number of words/characters in the vocabulary
-    # will be the number of unique words in the txt_list.
-    model = w2v(all_documents,
-                min_count = len(set([i for i in [j for j in all_documents]])),
+    # will be the number of unique words in the sentences.
+    model = w2v(sentences,
+                min_count = len(set([i for i in [j for j in sentences]])),
                 size = 100,
                 workers = 4)
     return model
@@ -122,7 +110,7 @@ def main(argv):
         sentences = getSentences(JSON_files)
 
         # Build the word2vec model using the sentences
-        #model = getWord2Vec(sentences)
+        model = getWord2Vec(sentences)
 
 
 
