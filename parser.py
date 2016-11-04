@@ -7,7 +7,9 @@ from os.path import isfile, join
 
 import simplejson
 import regex_helpers
+import string_helpers as sh
 import json
+import nltk.data
 
 TAGS = ['span', 'div', 'par']
 
@@ -19,7 +21,8 @@ def main():
     parses paragraphs, and stores an empty text file with the same corresponding name but different extension
     in the output directory.
     """
-    if len(sys.argv) < 4 or not type(sys.argv[1]) is str or not type(sys.argv[2]) is str or not type(sys.argv[3]) is str:
+    if len(sys.argv) < 4 or not type(sys.argv[1]) is str or not type(sys.argv[2]) is str or not type(
+            sys.argv[3]) is str:
         print "Incorrect number of args or args not of type string."
         print 'Correct usage is:'
         print 'python parser.py -method "input_dir_name" "output_dir_name"'
@@ -43,6 +46,7 @@ def main():
         print '-tag'
         print '-regex_sent'
         print '-regex_par'
+        exit()
 
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
@@ -52,11 +56,13 @@ def main():
     for f in files:
         document = load_document(os.path.join(input_directory, f))
         query = document['query']
-
         parsed_content = parse_function(document)
 
         if parsed_content is None:
+            print 'Ignored: ' + document['url']
             continue
+
+        print 'Parsed: ' + document['url']
 
         parsed_content['query'] = query
 
@@ -70,10 +76,12 @@ def load_document(path):
         document = json.load(json_data)
     return document
 
+
 def save_content(content, path):
-  f = open(path, 'w')
-  f.write(content)
-  f.close()
+    f = open(path, 'w')
+    f.write(content)
+    f.close()
+
 
 def whatisthis(s):
     if isinstance(s, str):
@@ -83,6 +91,7 @@ def whatisthis(s):
     else:
         print "not a string"
 
+
 def parse_document_tag_based(document):
     """
     Takes in a JSON object representing an HTML page, accesses its 'contents' tag, and parses the content. The content
@@ -90,10 +99,12 @@ def parse_document_tag_based(document):
     edge cases where certain content might not be accessible by considering only <p> tags.
 
     :param document: A JSON object representing the result of a google search
-    :return: A JSON object with the following schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    :return: A JSON object with the following additional properties added to the input: schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
     representing the parsed contents of a website.
     """
-    result = {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    document['authors'] = []
+    document['links'] = []
+    document['paragraphs'] = []
 
     # print whatisthis(document["contents"])
     soup = BeautifulSoup(document['contents'], 'html.parser')
@@ -108,17 +119,18 @@ def parse_document_tag_based(document):
     for link in links:
         href = link.get('href')
         if href != None:
-            result['links'].append(href.encode('ascii', 'ignore'))
+            document['links'].append(href.encode('ascii', 'ignore'))
 
     if soup.title:
-        result['title'] = soup.title.get_text().encode('ascii', 'ignore')
+        document['title'] = soup.title.get_text().encode('ascii', 'ignore')
     else:
         h1s = soup.select('h1')
         for h1 in h1s:
-            result['title'] = h1.get_text().encode('ascii', 'ignore')
+            document['title'] = h1.get_text().encode('ascii', 'ignore')
             break
 
     num_words = 0
+    num_pars = 0
 
     for element in pars:
         # if not any(True for _ in element.children):
@@ -126,25 +138,23 @@ def parse_document_tag_based(document):
         #     print child.get_text().encode('utf-8')
 
         images = element.select('a[class*="image"], a[class*="pict"], a[class*="phot"]')
-        # images.clear()
         for image in images:
             image.clear()
         text = element.get_text().encode('ascii', 'ignore')
 
-        # print element
 
         # for child in element.children:
         #     if child.name == "img":
         #         child.clear()
         if (len(text.split(" ")) > 5):
             if not regex_helpers.check_text_for_garbage(text.lower(), regex_helpers.GARBAGE) and \
-                regex_helpers.check_ends_with_punctuation(text):
+                    regex_helpers.check_ends_with_punctuation(text):
                 text = re.sub('\s+', ' ', text)
-                # print text
-                # print ""
+                text = text.replace('"', '')
+                num_pars += 1
                 num_words += len(text.split(' '))
-                result['paragraphs'].append(text)
-        # print element.contents
+                document['paragraphs'].append(text)
+                # print element.contents
     # for tag in TAGS:
     #     for tag1 in TAGS:
     #         relevant = soup.select(tag + " " + tag1)
@@ -159,7 +169,10 @@ def parse_document_tag_based(document):
     if num_words < 100:
         return None
 
-    return result
+    # print 'Number of paragraphs: ' + str(num_pars)
+
+    return document
+
 
 def parse_document_regex_based_paragraphs(document):
     """
@@ -168,15 +181,16 @@ def parse_document_regex_based_paragraphs(document):
     more liberal
 
     :param document: A JSON object representing the result of a google search
-    :return: A JSON object with the following schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    :return: A JSON object with the following additional properties added to the input: schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
     representing the parsed contents of a website.
     """
-    result = {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    document['authors'] = []
+    document['links'] = []
+    document['paragraphs'] = []
 
     soup = BeautifulSoup(document['contents'], 'html.parser')
 
     body = soup.select("body *")
-
     links = soup.find_all('a')
     images = soup.select('a[class*="image"], a[class*="pict"], a[class*="phot"]')
 
@@ -184,44 +198,51 @@ def parse_document_regex_based_paragraphs(document):
 
     for link in links:
         href = link.get('href')
-        if href != None:
-            result['links'].append(href.encode('ascii', 'ignore'))
+        if href is not None:
+            document['links'].append(href.encode('ascii', 'ignore'))
 
     if soup.title:
-        result['title'] = soup.title.get_text().encode('ascii', 'ignore')
+        document['title'] = soup.title.get_text().encode('ascii', 'ignore')
     else:
         h1s = soup.select('h1')
         for h1 in h1s:
-            result['title'] = h1.get_text().encode('ascii', 'ignore')
+            document['title'] = h1.get_text().encode('ascii', 'ignore')
             break
 
-    generator = (element for element in body if element.name != 'script' and element.name != 'img' and len(element.findChildren()) == 0)
+    generator = (element for element in body if
+                 element.name != 'script' and element.name != 'img' and len(element.findChildren()) == 0)
+    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
     num_words = 0
+    num_pars = 0
 
     for element in generator:
         text = element.get_text().encode('ascii', 'ignore')
 
-        sentences = re.split(regex_helpers.PARAGRAPH_SPLITTING_PATTERN, text)
-
+        sentences = tokenizer.tokenize(text)
         paragraph = ""
 
         for sentence in sentences:
-            trimmed = re.sub('\s+', ' ', sentence)
-            if trimmed != '' and regex_helpers.check_ends_with_punctuation(trimmed) and not \
-                    regex_helpers.check_text_for_garbage(trimmed, regex_helpers.GARBAGE):
-                paragraph += ' ' + trimmed
+            sentence = sh.remove_garbage(sentence)
 
-        if paragraph != "" and len(paragraph.split(' ')) > 5 :
-            result['paragraphs'].append(paragraph)
-            # print paragraph
-            # print ""
+            if sentence != '' and regex_helpers.check_ends_with_punctuation(sentence) and not \
+                    regex_helpers.check_text_for_garbage(sentence, regex_helpers.GARBAGE):
+                paragraph += ' ' + sentence
+
+        paragraph.replace(' ', '', 1)
+
+        if paragraph != "" and len(paragraph.split(' ')) > 5:
+            document['paragraphs'].append(paragraph)
+            num_pars += 1
             num_words += len(paragraph.split(' '))
 
     if num_words < 150:
         return None
 
-    return result
+    # print 'Number of paragraphs: ' + str(num_pars)
+
+    return document
+
 
 def parse_document_regex_based_sentences(document):
     """
@@ -230,15 +251,16 @@ def parse_document_regex_based_sentences(document):
     more liberal
 
     :param document: A JSON object representing the result of a google search
-    :return: A JSON object with the following schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    :return: A JSON object with the following additional properties added to the input: schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
     representing the parsed contents of a website.
     """
-    result = {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    document['authors'] = []
+    document['links'] = []
+    document['paragraphs'] = []
 
     soup = BeautifulSoup(document['contents'], 'html.parser')
 
     body = soup.select("body *")
-
     links = soup.find_all('a')
     images = soup.select('a[class*="image"], a[class*="pict"], a[class*="phot"]')
 
@@ -247,38 +269,42 @@ def parse_document_regex_based_sentences(document):
     for link in links:
         href = link.get('href')
         if href != None:
-            result['links'].append(href.encode('ascii', 'ignore'))
+            document['links'].append(href.encode('ascii', 'ignore'))
 
     if soup.title:
-        result['title'] = soup.title.get_text().encode('ascii', 'ignore')
+        document['title'] = soup.title.get_text().encode('ascii', 'ignore')
     else:
         h1s = soup.select('h1')
         for h1 in h1s:
-            result['title'] = h1.get_text().encode('ascii', 'ignore')
+            document['title'] = h1.get_text().encode('ascii', 'ignore')
             break
 
-    generator = (element for element in body if element.name != 'script' and element.name != 'img' and len(element.findChildren()) == 0)
+    generator = (element for element in body if
+                 element.name != 'script' and element.name != 'img' and len(element.findChildren()) == 0)
+    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
     num_words = 0
 
     for element in generator:
         text = element.get_text().encode('ascii', 'ignore')
 
-        sentences = re.split(regex_helpers.PARAGRAPH_SPLITTING_PATTERN, text)
+        sentences = tokenizer.tokenize(text)
 
         for sentence in sentences:
-            trimmed = re.sub('\s+', ' ', sentence)
-            len_trimmed = len(trimmed)
-            if trimmed != '' and regex_helpers.check_ends_with_punctuation(trimmed) and not \
-                    regex_helpers.check_text_for_garbage(trimmed, regex_helpers.GARBAGE) and \
-                    len_trimmed > 5:
-                result['paragraphs'].append(trimmed)
-                num_words += len_trimmed
+            sentence = sh.remove_garbage(sentence)
+            len_sentence = len(sentence.split(' '))
+
+            if sentence != '' and regex_helpers.check_ends_with_punctuation(sentence) and not \
+                    regex_helpers.check_text_for_garbage(sentence, regex_helpers.GARBAGE) and \
+                            len_sentence > 5:
+                document['paragraphs'].append(sentence)
+                num_words += len_sentence
 
     if num_words < 150:
         return None
 
-    return result
+    return document
+
 
 def peek(iterable):
     try:
@@ -286,7 +312,6 @@ def peek(iterable):
     except StopIteration:
         return True
     return False
-
 
 
 if __name__ == "__main__":
