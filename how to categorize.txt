@@ -1,0 +1,17 @@
+Is the website relevant?
+	No -> mark [n]ot relevant
+	eg. page is blank, youtube video, off topic
+
+	Yes ->
+		Is it accredited?
+			No ->
+				Is the info they provide true (backed up or a proven belief)?
+					No -> mark as [f]alse
+					eg. blogs, forums suggesting false claims
+
+					Yes -> mark as [t]rue
+					eg. news sites, magazines, random websites stating backed up claims
+
+			Yes -> mark as [a]ccredited
+			eg. ALL relevant HONCode sites, journals, gov sites (NOT news sites)
+
