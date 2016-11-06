@@ -6,7 +6,7 @@ import json
 import webbrowser
 
 FOLDER = "./" + sys.argv[1] + "/"
-VALID_CATEGORIES = ['f', 'a', 'u', 'n']
+VALID_CATEGORIES = ['f', 'a', 'u', 'n', 't']
 def main():
 	print("Enter the category of this search (don't pick 'q') ")
 	expected = get_expected_category()
@@ -20,8 +20,7 @@ def main():
 
 		#if doc was already categorized, skip
 		if('expected-search-type' in doc):
-			print(fn + " was already categorized...skipping")
-			continue
+			print(fn + " was already categorized as '" + doc['actual-search-type'] + "' ...result will be overridden")
 
 		open_url(doc['url'])
 
@@ -54,10 +53,10 @@ def get_expected_category():
 
 
 def get_category():
-	res = raw_input("Input: [f]ake, [a]ccredited, [n]ot relevant. q to skip \t")
+	res = raw_input("Input: [a]ccredited, [t]rue, [f]alse, [n]ot relevant. q to skip \t")
 	
 	while (res not in VALID_CATEGORIES and res != "q"):
-		res = raw_input("Incorrect input...choose [f]ake, [a]ccredited, [n]ot relevant. q to skip \t")
+		res = raw_input("Incorrect input...choose [a]ccredited, [t]rue, [f]alse, [n]ot relevant. q to skip \t")
 
 	return res
 
