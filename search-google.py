@@ -35,9 +35,9 @@ from googleapiclient.discovery import build
 
 API_KEY = "AIzaSyB-HfmAFqW10Hp3nO7Vh6MX2s7LDMvRdAg"
 
-CSE_ID = "017448297487401808077:o0oyzopipio" #search all sites
+#CSE_ID = "017448297487401808077:o0oyzopipio" #search all sites
 #CSE_ID = "017448297487401808077:uw5linhdq6c" #schema.org limitation [MedicalEntity] - all sites
-#CSE_ID = "017448297487401808077:wklbk_lctfa" #blogs only
+CSE_ID = "017448297487401808077:wklbk_lctfa" #blogs only
 #CSE_ID = "017448297487401808077:wnqqxbff81o" #HONCode replica
 
 QUERY = sys.argv[1]

@@ -7,7 +7,7 @@ Is the website relevant?
 			No ->
 				Is the info they provide true (backed up or a proven belief)?
 					No -> mark as [f]alse
-					eg. blogs, forums suggesting false claims
+					eg. blogs, forums suggesting false claims, gpvernment warning sites
 
 					Yes -> mark as [t]rue
 					eg. news sites, magazines, random websites stating backed up claims
