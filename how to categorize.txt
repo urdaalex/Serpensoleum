@@ -1,6 +1,6 @@
 Is the website relevant?
 	No -> mark [n]ot relevant
-	eg. page is blank, youtube video, off topic
+	eg. page is blank, youtube video, off topic, interviews, search engine fixated on comments
 
 	Yes ->
 		Is it accredited?
