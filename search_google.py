@@ -35,12 +35,12 @@ from googleapiclient.discovery import build
 
 API_KEY = "AIzaSyB-HfmAFqW10Hp3nO7Vh6MX2s7LDMvRdAg"
 
-#CSE_ID = "017448297487401808077:o0oyzopipio" #search all sites
+CSE_ID = "017448297487401808077:o0oyzopipio" #search all sites
 #CSE_ID = "017448297487401808077:uw5linhdq6c" #schema.org limitation [MedicalEntity] - all sites
-CSE_ID = "017448297487401808077:wklbk_lctfa" #blogs only
+# CSE_ID = "017448297487401808077:wklbk_lctfa" #blogs only
 #CSE_ID = "017448297487401808077:wnqqxbff81o" #HONCode replica
 
-QUERY = sys.argv[1]
+QUERY = ""
 
 if len(sys.argv) != 3:
   DOWNLOAD_FOLDER="./raw/"
@@ -50,6 +50,8 @@ else:
 NUM_OF_PAGES = 3
 
 def main():
+  global QUERY
+  QUERY = sys.argv[1]
   service = build("customsearch", "v1",
             developerKey=API_KEY)
 
@@ -89,6 +91,7 @@ def main():
 
 
 def get_url(url):
+  print('Get url ' + url)
   fake_hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',

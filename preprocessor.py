@@ -16,7 +16,7 @@ Notes on the implementation
 
 def getProcessedDocument(article_dict):
     '''
-    Given a dictionary in format returned from parser.py, this function
+    Given a dictionary in format returned from html_parser.py, this function
     replaces the paragraphs in the paragraphs list (i.e. the body of
     the parsed article) with the stemmed version of those paragraphs
     (using the Lancaster Stemming Algorithm), and removes the stop

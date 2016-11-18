@@ -25,9 +25,9 @@ def main():
             sys.argv[3]) is str:
         print "Incorrect number of args or args not of type string."
         print 'Correct usage is:'
-        print 'python parser.py -method "input_dir_name" "output_dir_name"'
+        print 'python html_parser.py -method "input_dir_name" "output_dir_name"'
         print 'Where method is either regex or tag'
-        print 'For example:: python parser.py -tag "raw" "parsed"'
+        print 'For example:: python html_parser.py -tag "raw" "parsed"'
         exit()
 
     method = sys.argv[1]
@@ -56,13 +56,15 @@ def main():
     for f in files:
         document = load_document(os.path.join(input_directory, f))
         query = document['query']
+
+        print 'Parsed: ' + document['url']
+        print ""
+
         parsed_content = parse_function(document)
 
         if parsed_content is None:
             print 'Ignored: ' + document['url']
             continue
-
-        print 'Parsed: ' + document['url']
 
         parsed_content['query'] = query
 
@@ -298,6 +300,8 @@ def parse_document_regex_based_sentences(document):
                     regex_helpers.check_text_for_garbage(sentence, regex_helpers.GARBAGE) and \
                             len_sentence > 5:
                 document['paragraphs'].append(sentence)
+                print sentence
+                print ""
                 num_words += len_sentence
 
     if num_words < 150:
