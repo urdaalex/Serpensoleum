@@ -1,5 +1,4 @@
  'use strict'
-
  chrome.extension.onConnect.addListener(function(port) {
      console.log("Connected .....");
      if (port.name == "popup_background") {
