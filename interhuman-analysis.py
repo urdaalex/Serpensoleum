@@ -20,11 +20,13 @@ def main():
 
 		if(not doc['url'] in d.keys()):
 			if(doc['actual-search-type']=='a'):
-				d[doc['url']] =[1,0,0]
+				d[doc['url']] =[1,0,0,0]
 			if(doc['actual-search-type']=='f'):
-				d[doc['url']] =[0,1,0]
+				d[doc['url']] =[0,1,0,0]
 			if(doc['actual-search-type']=='n'):
-				d[doc['url']] =[0,0,1]
+				d[doc['url']] =[0,0,1,0]
+			if(doc['actual-search-type']=='t'):
+				d[doc['url']] =[0,0,0,1]
 		else:
 			if(doc['actual-search-type']=='a'):
 				d[doc['url']][0] = d[doc['url']][0]	+ 1
@@ -32,10 +34,12 @@ def main():
 				d[doc['url']][1] = d[doc['url']][1]	+ 1
 			if(doc['actual-search-type']=='n'):
 				d[doc['url']][2] = d[doc['url']][2]	+ 1
+			if(doc['actual-search-type']=='t'):
+				d[doc['url']][3] = d[doc['url']][3]	+ 1
 
 	for k,v in d.iteritems():
-		if (v[0] + v[1] + v[2] > 1):
-			print(" [a,f,n]:" + str(v))
+		if (v[0] + v[1] + v[2] + v[3] > 1):
+			print(" [a,f,n,t]:" + str(v))
 		
 def listdir_path(d):
     return [os.path.join(d, f) for f in os.listdir(d)]
