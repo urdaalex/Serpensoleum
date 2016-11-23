@@ -19,14 +19,11 @@ def isValid(input_args):
                 "\t 1) Too few or too many inputs \n" +\
                 "\t 2) The input directory doesn't exist\n" +\
                 "\t 3) The output directory already exists\n" +\
-                "\t 4) The specified method is not one of: \n" +\
-                "\t\t '-word2vec' or '-doc2vec' or '-customfeatures'\n" +\
-                "\t Correct usage: \n" +\
-                "\t\t python generate-featurevectors.py 'input_dir_name' 'output_dir_name' -method"
+                "Correct usage: \n" +\
+                "\t clustering_approach.py 'input_dir_name' 'output_dir_name'"
 
-    if len(input_args) != 3 or os.path.exists(input_args[1]) \
-                or not os.path.exists(input_args[0]) or \
-                input_args[2] not in ['-word2vec', '-doc2vec', '-customfeatures']:
+    if len(input_args) != 2 or os.path.exists(input_args[1]) \
+                or not os.path.exists(input_args[0]):
         print proper_usage
         return False
 
@@ -72,10 +69,9 @@ def main(argv):
     '''
     Given the array of arguments to the program, the main method will ensure
     that the inputs are valid, if they are, the JSON files in the input
-    directory will be loaded, and transformed to feature vectors
-    using the method specified by the -method flag . The feature vectors of the
-    JSON files will then be saved to the output directory specified by the
-    input arguments as .pickle files.
+    directory will be loaded, and the clustering approach will be applied
+    on the data in the input directory. The model will then be saved
+    into a pickle file specified by the input arguments
     '''
     # Check that the input arguments are valid
     if not isValid(argv):
@@ -87,15 +83,9 @@ def main(argv):
         with open(os.path.join(argv[0], filename), 'r') as json_file:
             JSON_files.append(simplejson.load(json_file))
 
-    # Get the feature vectors of the JSON files using the method
-    # specified in the input
-    if (argv[2] == '-word2vec'):
-        # Get a list of sentences where each sentence is a
-        # list of all the words/characters in it
-        sentences = getSentences(JSON_files)
+    # Get all the documents in the JSON files
+    documents_and_labels = getDocuments(JSON_files)
 
-        # Build the word2vec model using the sentences
-        model = getWord2Vec(sentences)
 
 
 
