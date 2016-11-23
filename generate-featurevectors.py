@@ -53,18 +53,19 @@ def getDocuments(JSON_files):
     '''
     Given a list of JSON files, where each JSON file has a dictionary 'paragraphs'
     which is a list of the paragraphs in the article represented by that JSON file,
-    this function returns a list of documents (each article is a document),
-    where a document representation of an article is the concatenation of
-    the paragraphs it contains
+    this function returns a list of documents (each article is a document) &
+    its label (list of document, label tuples), where a document representation
+    of an article is the concatenation of the paragraphs it contains
     '''
     all_documents = []
     for json in JSON_files:
         paragraphs = json['paragraphs']
+        label = json['actual-search-type']
         document = ''
         for paragraph in paragraphs[:-1]:
             document += paragraph + "\n\n"
         document += paragraphs[-1]
-        all_documents.append(document)
+        all_documents.append((document, label))
     return all_documents
 
 def main(argv):
