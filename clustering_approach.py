@@ -120,11 +120,16 @@ def makeBlobs(all_documents):
 def makeDocumentVectors(all_documents):
     '''
     Given all documents as returned by getDocuments, this function will
-    create a list of tf-idf vectors representing each document
+    return a list of tf-idf vectors representing each document. This function
+    will pad document vectors with 0 until they all have the same length
+    (the length of the max length document vector)
     '''
     # Make all the documents into TextBlobs
     documents = makeBlobs(all_documents)
     document_vectors = []
+
+    # Keep track of the dimensionality of the highest dimensional tf-idf vector
+    max_length = -1 * float('inf')
 
     # For each document, get the tf-idf of each word in it
     for doc in documents:
@@ -132,7 +137,14 @@ def makeDocumentVectors(all_documents):
         for word in doc.words:
             tf_idf = getTfIdf(word, doc, documents)
             document_vector.append(tf_idf)
+        if len(document_vector) > max_length:
+            max_length = len(document_vector)
         document_vectors.append(np.array(document_vector))
+
+    # Ensure that each tf-idf vector has the same dimensionality
+    # by padding with 0's
+    for i in range(len(document_vectors)):
+        document_vectors[i] = np.append(document_vectors[i], [0] * (max_length - len(document_vectors[i])))
 
     return document_vectors
 
