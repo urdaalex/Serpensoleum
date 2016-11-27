@@ -6,6 +6,12 @@ from gensim.models import Word2Vec as w2v
 from gensim.models import Doc2Vec as d2v
 import logging
 import nltk.data
+from textblob import TextBlob
+from __future__ import division, unicode_literals
+
+# Split paragraphs by this token in order to easily retrieve them
+# from the document
+paragraph_splitter = "\n\n--\n\n"
 
 '''
 NOTE:
@@ -66,7 +72,7 @@ def getDocuments(JSON_files):
         label = json['actual-search-type']
         document = ''
         for paragraph in paragraphs[:-1]:
-            document += paragraph + "\n\n"
+            document += paragraph + paragraph_splitter
         document += paragraphs[-1]
         all_documents.append((document, label))
     return all_documents
@@ -91,6 +97,7 @@ def main(argv):
 
     # Get all the documents in the JSON files
     documents_and_labels = getDocuments(JSON_files)
+
 
 
 if __name__ == "__main__":

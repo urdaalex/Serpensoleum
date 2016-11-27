@@ -20,6 +20,7 @@
 6. pip install cPickle
 7. Download and untar Stanford Parser `http://nlp.stanford.edu/software/lex-parser.shtml`
 8. pip install logging
+9. pip install textblob
 
 
 ## Usage
