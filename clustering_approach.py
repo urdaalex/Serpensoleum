@@ -8,6 +8,7 @@ import logging
 import nltk.data
 from textblob import TextBlob
 from __future__ import division, unicode_literals
+from math import log
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
@@ -76,6 +77,44 @@ def getDocuments(JSON_files):
         document += paragraphs[-1]
         all_documents.append((document, label))
     return all_documents
+
+def getTf(word, document):
+    '''
+    Given a word and a document, this function returns the term frequency
+    of the word in the documents
+    '''
+    return document.words.count(word) / len(document.words)
+
+def getNumContaining(word, documents):
+    '''
+    Given a word and a list of all documents, this function returns the number
+    of documents that contain word in them
+    '''
+    # convert all documents to textblobs
+    return sum(1 for doc in documents if word in doc.words)
+
+def getIdf(word, documents):
+    '''
+    Given a word and a list of all documents, this function returns the
+    inverse document frequency of word
+    '''
+    return log(len(documents) / (1 + getNumContaining(word, documents)))
+
+def getTfIdf(word, document, documents):
+    '''
+    Given a word, a document, and a list of all documents, this function
+    returns the tf-idf of the word relative to document (the product of
+    the term frequency of word in document, multiplied by the inverse document
+    frequency of the word over all documents)
+    '''
+    return getTf(word, document) * getIdf(word, documents)
+
+def makeBlobs(all_documents):
+    '''
+    Given a list of all documents as returned by getDocuments, this function
+    makes a list of documents where each document is a TextBlob
+    '''
+    return [TextBlob(all_documents[i][0]) for i in range(len(all_documents))]
 
 def main(argv):
     '''
