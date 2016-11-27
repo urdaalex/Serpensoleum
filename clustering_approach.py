@@ -185,7 +185,7 @@ def main(argv):
 
     # Run affinity propogation to 'guess' the number of clusters
     # there are for the documents
-    print getNumClusters(document_vectors)
+    num_clusters = getNumClusters(document_vectors)
 
 
 if __name__ == "__main__":
