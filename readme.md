@@ -21,6 +21,7 @@
 7. Download and untar Stanford Parser `http://nlp.stanford.edu/software/lex-parser.shtml`
 8. pip install logging
 9. pip install textblob
+10. pip install numpy
 
 
 ## Usage

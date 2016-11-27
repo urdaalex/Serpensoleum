@@ -9,6 +9,7 @@ import nltk.data
 from textblob import TextBlob
 from __future__ import division, unicode_literals
 from math import log
+import numpy as np
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
@@ -115,6 +116,25 @@ def makeBlobs(all_documents):
     makes a list of documents where each document is a TextBlob
     '''
     return [TextBlob(all_documents[i][0]) for i in range(len(all_documents))]
+
+def makeDocumentVectors(all_documents):
+    '''
+    Given all documents as returned by getDocuments, this function will
+    create a list of tf-idf vectors representing each document
+    '''
+    # Make all the documents into TextBlobs
+    documents = makeBlobs(all_documents)
+    document_vectors = []
+
+    # For each document, get the tf-idf of each word in it
+    for doc in documents:
+        document_vector = []
+        for word in doc.words:
+            tf_idf = getTfIdf(word, doc, documents)
+            document_vector.append(tf_idf)
+        document_vectors.append(np.array(document_vector))
+
+    return document_vectors
 
 def main(argv):
     '''
