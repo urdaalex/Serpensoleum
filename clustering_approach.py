@@ -1,3 +1,4 @@
+from __future__ import division, unicode_literals
 import sys
 import os
 import cPickle as pickle
@@ -7,7 +8,6 @@ from gensim.models import Doc2Vec as d2v
 import logging
 import nltk.data
 from textblob import TextBlob
-from __future__ import division, unicode_literals
 from math import log
 import numpy as np
 
@@ -169,6 +169,8 @@ def main(argv):
     # Get all the documents in the JSON files
     documents_and_labels = getDocuments(JSON_files)
 
+    # Get all document vectors
+    document_vectors = makeDocumentVectors(documents_and_labels)
 
 
 if __name__ == "__main__":
