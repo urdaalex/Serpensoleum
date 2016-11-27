@@ -10,6 +10,7 @@ import nltk.data
 from textblob import TextBlob
 from math import log
 import numpy as np
+from sklearn.cluster import AffinityPropagation
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
@@ -148,6 +149,16 @@ def makeDocumentVectors(all_documents):
 
     return document_vectors
 
+def getNumClusters(doc_vectors):
+    '''
+    Given a list of document vectors as returned by makeDocumentVectors,
+    this function runs affinity propogation on the vectors to approximate
+    the number of clusters the documents would fall into
+    '''
+    clf = AffinityPropagation()
+    clf.fit(doc_vectors)
+    return len(clf.cluster_centers_indices_)
+
 def main(argv):
     '''
     Given the array of arguments to the program, the main method will ensure
@@ -171,6 +182,10 @@ def main(argv):
 
     # Get all document vectors
     document_vectors = makeDocumentVectors(documents_and_labels)
+
+    # Run affinity propogation to 'guess' the number of clusters
+    # there are for the documents
+    print getNumClusters(document_vectors)
 
 
 if __name__ == "__main__":

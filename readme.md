@@ -22,6 +22,7 @@
 8. pip install logging
 9. pip install textblob
 10. pip install numpy
+11. pip install sklearn
 
 
 ## Usage
