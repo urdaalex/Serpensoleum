@@ -1,9 +1,12 @@
     'use strict'
 
     function initializeChromeStorageState() {
+        // By default the extension will be enabled when first importing it into chrome
         chrome.storage.sync.get('enabledStatus', function(obj) {
             if (obj.enabledStatus == null) {
-                chrome.storage.sync.set({ 'enabledStatus': true }, function() {});
+                chrome.storage.sync.set({ 'enabledStatus': true }, function() {
+                    updateButtonText();
+                });
             }
         })
     }
@@ -13,9 +16,13 @@
     function updateButtonText() {
         chrome.storage.sync.get("enabledStatus", function(obj) {
             if (obj.enabledStatus == true) {
-                $("#commandBtn").attr("value", "disable");
+                $("#commandBtn").attr("value", "Disable");
+                $("#commandBtn").removeClass();
+                $("#commandBtn").addClass("disable");
             } else {
-                $("#commandBtn").attr("value", "enable");
+                $("#commandBtn").attr("value", "Enable");
+                $("#commandBtn").removeClass();
+                $("#commandBtn").addClass("enable");
             }
         });
     }
@@ -26,7 +33,6 @@
         var state = chrome.storage.sync.get('enabledStatus', function(obj) {
             chrome.storage.sync.set({ 'enabledStatus': !obj.enabledStatus }, function() {
                 updateButtonText();
-                // broadCastToBackgroundScript();
                 broadcastAllTabs();
             });
         });
@@ -35,13 +41,6 @@
     var popup_to_background_port = chrome.extension.connect({
         name: "popup_background"
     });
-
-    // port.postMessage("disable");
-
-    // port.onMessage.addListener(function(msg) {
-    //     console.log("message recieved" + msg);
-    // });
-
 
     function broadcastAllTabs() {
         chrome.tabs.query({}, function(tabs) {
@@ -54,35 +53,11 @@
     }
 
     function broadCastToBackgroundScript() {
-        // var port = chrome.extension.connect({
-        //     name: "popup_background"
-        // });
-
         popup_to_background_port.postMessage();
-
-        // port.onMessage.addListener(function(msg) {
-        //     console.log("message recieved" + msg);
-        // });
     }
-
-    // chrome.extension.onConnect.addListener(function(port) {
-    //     console.log("Connected .....");
-    //     if (port == "background_to_popup") {
-    //         port.onMessage.addListener(function(msg) {
-    //             console.log("message recieved" + msg);
-    //             port.postMessage("Hi Popup.js");
-    //         });
-    //     } else if (port == "")
-
-    // });
-
 
     window.onload = function() {
         document.getElementById('commandBtn').onclick = function() {
-
             changeChromeStorageState();
-
-            // alert("button 2 was clicked");
-
         };
     }

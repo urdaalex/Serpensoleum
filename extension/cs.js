@@ -5,19 +5,19 @@
 // port.onMessage.addListener(function(msg) {
 //   if (msg.response == false)
 //     // port.postMessage({answer: "Madame"});
-// 	removeAllScripts();
+//  removeAllScripts();
 //   else if (msg.question == "Madame who?")
 //     // port.postMessage({answer: "Madame... Bovary"});
-// 	injectAllScripts();
+//  injectAllScripts();
 // });
 
 // function onRequest(request) {
 //     if (request.action == 'start')
 //         // startExtension()
-//     	injectAllScripts();	
+//      injectAllScripts(); 
 //     else if (request.action == 'stop')
 //         // stopExtension()
-//     	removeAllScripts();
+//      removeAllScripts();
 //     sendResponse({});
 // }
 
@@ -41,16 +41,18 @@ chrome.extension.onConnect.addListener(function(port) {
             if (msg.state == false) {
                 removeAllScripts();
             } else if (msg.state == true) {
-                injectAllScripts();
+                if (window.location.href.indexOf('google') > -1) {
+                    injectAllScripts();
+                }
             }
         });
     }
 });
 
 function messageListener(request, sender, sendResponse) {
-	handleStateModification();
+    handleStateModification();
 
-	sendResponse({});
+    sendResponse({});
 
     // sendResponse({ state: chrome.storage.sync.get('enabledStatus') });
 }
@@ -83,7 +85,9 @@ function handleStateModification() {
         }
 
         if (obj.enabledStatus == true) {
-            injectAllScripts();
+            if (window.location.href.indexOf('google') > -1) { 
+                injectAllScripts();
+            }
         } else {
             removeAllScripts();
         }

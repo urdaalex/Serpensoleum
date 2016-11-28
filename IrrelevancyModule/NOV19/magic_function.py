@@ -43,8 +43,9 @@ def work_file(doc):
 
 
 
-def magic_fucnction(jsonfile):
-    with open('saved_model.pkl', 'rb') as fid:
+def check_relevancy_of_document(jsonfile, model_path = ""):
+    print(jsonfile.keys())
+    with open(model_path, 'rb') as fid:
         model = cPickle.load(fid)
         
     X = [work_file(jsonfile)]
