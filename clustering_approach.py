@@ -12,6 +12,7 @@ from math import log
 import numpy as np
 from sklearn.cluster import AffinityPropagation
 from sklearn.mixture import GaussianMixture
+from sklearn.cluster import KMeans
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
@@ -187,15 +188,9 @@ def main(argv):
     # there are for the documents
     num_clusters = getNumClusters(document_vectors)
 
-    # Cluster the data using the EM algorithm on a GMM (with kmeans init)
-    # Have one shared covariance matrix for all components (otherwise this
-    # becomes very computationally intractable very fast)
-    clf = GaussianMixture(n_components=num_clusters, covariance_type='tied',
-                            tol=0.0001, init_params='kmeans')
+    # Cluster the document vectors using KMeans
+    clf = KMeans(n_clusters=num_clusters)
     clf.fit(document_vectors)
-    print clf.weights_
-    print "---"
-    print clf.means_
 
 
 if __name__ == "__main__":
