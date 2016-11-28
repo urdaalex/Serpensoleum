@@ -1,6 +1,6 @@
 import web
 import json
-from server_utils import check_website_truthfullness
+from server_utils import *
 
 urls = ('/check_valid', 'MyServer')
 
@@ -13,19 +13,42 @@ class MyServer(web.application):
         web.header('Access-Control-Allow-Origin', '*')
         web.header('Access-Control-Allow-Credentials', 'true')
         data = json.loads(web.data())
-        print(data.keys())
+        # print("-------------------------request start-------------------------")
+        # print("query: " + data['query'])
+        # print("-------------------------request end-------------------------")
 
         url = data['url']
         query = data['query']
 
-        response = {'validity': False}
-        if check_website_truthfullness(url, query):
-            response['validity'] = True
-            return json.dumps(response)
-        else:
-            return json.dumps(response)
+        return relevancy_handler(query, url)
+
 
         # return 'URL sent was: ' + value
+
+def relevancy_handler(query, url):
+    response = {'relevant': False}
+    truthfulness = check_website_relevancy(url, query)
+
+    if truthfulness == ERROR_PARSING:
+        response['error'] = 'Error Parsing'
+    else:
+        response['relevant'] = truthfulness
+    return json.dumps(response)
+
+
+def classification_handler(query, url):
+    response = {'valid': False}
+    truthfulness = check_website_validity(url, query)
+
+    if truthfulness == ERROR_PARSING:
+        response['error'] = 'Error Parsing'
+
+    if check_website_validity(url, query):
+        response['valid'] = truthfulness
+        return json.dumps(response)
+    else:
+        return json.dumps(response)
+
 
 if __name__ == '__main__':
     app = MyServer(urls, globals())

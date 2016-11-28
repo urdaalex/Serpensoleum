@@ -60,9 +60,9 @@ def main():
         print 'Parsed: ' + document['url']
         print ""
 
-        parsed_content = parse_function(document)
+        parsed_content, parsed_status = parse_function(document)
 
-        if parsed_content is None:
+        if parsed_status == False:
             print 'Ignored: ' + document['url']
             continue
 
@@ -169,11 +169,11 @@ def parse_document_tag_based(document):
     # print text.encode('utf-8')
 
     if num_words < 100:
-        return None
+        return document, False
 
     # print 'Number of paragraphs: ' + str(num_pars)
 
-    return document
+    return document, True
 
 
 def parse_document_regex_based_paragraphs(document):
@@ -239,11 +239,11 @@ def parse_document_regex_based_paragraphs(document):
             num_words += len(paragraph.split(' '))
 
     if num_words < 150:
-        return None
+        return document, False
 
     # print 'Number of paragraphs: ' + str(num_pars)
 
-    return document
+    return document, True
 
 
 def parse_document_regex_based_sentences(document):
@@ -261,6 +261,8 @@ def parse_document_regex_based_sentences(document):
     document['paragraphs'] = []
 
     soup = BeautifulSoup(document['contents'], 'html.parser')
+    if 'cdc' in document['query']:
+        print
 
     body = soup.select("body *")
     links = soup.find_all('a')
@@ -300,14 +302,14 @@ def parse_document_regex_based_sentences(document):
                     regex_helpers.check_text_for_garbage(sentence, regex_helpers.GARBAGE) and \
                             len_sentence > 5:
                 document['paragraphs'].append(sentence)
-                print sentence
-                print ""
+                # print sentence
+                # print ""
                 num_words += len_sentence
 
     if num_words < 150:
-        return None
+        return document, False
 
-    return document
+    return document, True
 
 
 def peek(iterable):
