@@ -20,6 +20,13 @@
 6. pip install cPickle
 7. Download and untar Stanford Parser `http://nlp.stanford.edu/software/lex-parser.shtml`
 8. pip install logging
+9. pip install textblob
+10. pip install numpy
+11. pip install sklearn
+    - **NOTE**: you might get the error that the GaussianMixture module is
+    not available (which happen for lack of updated dependencies), the following    
+    terminal command fixes that
+    </br> `pip install -U numpy scipy scikit-learn` </br>
 
 
 ## Usage
