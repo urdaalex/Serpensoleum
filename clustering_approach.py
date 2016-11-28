@@ -93,7 +93,6 @@ def getNumContaining(word, documents):
     Given a word and a list of all documents, this function returns the number
     of documents that contain word in them
     '''
-    # convert all documents to textblobs
     return sum(1 for doc in documents if word in doc.words)
 
 def getIdf(word, documents):
