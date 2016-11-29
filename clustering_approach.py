@@ -15,7 +15,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import euclidean
 from sklearn.utils import shuffle
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
