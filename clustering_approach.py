@@ -13,6 +13,7 @@ import numpy as np
 from sklearn.cluster import AffinityPropagation
 from sklearn.mixture import GaussianMixture
 from sklearn.cluster import KMeans
+from scipy.spatial.distance import euclidean
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
@@ -159,6 +160,55 @@ def getNumClusters(doc_vectors):
     clf = AffinityPropagation()
     clf.fit(doc_vectors)
     return len(clf.cluster_centers_indices_)
+
+def getNearestDocuments(target, documents):
+    '''
+    Given a target document in the form returned by makeDocumentVectors
+    and the rest of the documents (also in the form returned by
+    makeDocumentVectors), this function returns the indices of the set
+    of documents that fall into the same cluster as the target document
+    '''
+    # Get the number of clusters from affinity
+    num_clusters = getNumClusters(documents)
+
+    # Cluster the documents using KMeans
+    clf = KMeans(n_clusters=num_clusters)
+    clf.fit(documents)
+
+    # Find the cluster centre which is nearest to target
+    min_distance = float('inf')
+    min_idx = -1
+    for i in range(len(clf.cluster_centers_)):
+        current_distance = euclidean(clf.cluster_centers_[i], target)
+        if current_distance < min_distance:
+            min_distance = current_distance
+            min_idx = i
+    target_cluster_idx = min_idx
+
+    # Make a list documents_in_each_cluster = [y_0, y_1, ..., y_n] where y_0
+    # is a list of indices representing the documents in 'documents' that fall
+    # into cluster 0, WLOG y_1 is for the documents that fall into cluster 1,
+    # and so on...
+    documents_in_each_cluster = [[] for i in range(num_clusters)]
+    for doc_idx in range(len(documents)):
+        # Get the current document
+        doc = documents[doc_idx]
+
+        # Find the cluster to which doc belongs
+        closest_cluster_idx = -1
+        min_distance = float('inf')
+        for i in range(len(clf.cluster_centers_)):
+            current_distance = euclidean(clf.cluster_centers_[i], doc)
+            if current_distance < min_distance:
+                min_distance = current_distance
+                closest_cluster_idx = i
+
+        # Add doc_idx to the list of document indices representing the
+        # documents that belong to the cluster specified by closest_cluster_idx
+        documents_in_each_cluster[closest_cluster_idx].append(doc_idx)
+
+    return documents_in_each_cluster[target_cluster_idx]
+
 
 def main(argv):
     '''
