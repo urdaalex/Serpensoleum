@@ -27,6 +27,7 @@
     not available (which happen for lack of updated dependencies), the following    
     terminal command fixes that
     </br> `pip install -U numpy scipy scikit-learn` </br>
+12. pip install scipy
 
 
 ## Usage
