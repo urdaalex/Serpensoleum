@@ -14,6 +14,8 @@ from sklearn.cluster import AffinityPropagation
 from sklearn.mixture import GaussianMixture
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import euclidean
+from sklearn.utils import shuffle
+from sklearn.cross_validation import train_test_split
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
@@ -235,6 +237,12 @@ def main(argv):
     document_vectors = makeDocumentVectors(documents_and_labels)
     labels = [documents_and_labels[i][1] for i in range(len(documents_and_labels))]
 
+    # Shuffle the data, include random state for reproducibility
+    X, y = shuffle(document_vectors, labels, random_state=0)
 
+    # Split the data (20% of data going into the test set)
+    # include random state for reproducibility
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20,
+                                                       random_state=0)
 if __name__ == "__main__":
     main(sys.argv[1:])
