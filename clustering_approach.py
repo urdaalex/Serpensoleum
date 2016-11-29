@@ -3,10 +3,6 @@ import sys
 import os
 import cPickle as pickle
 import simplejson
-#from gensim.models import Word2Vec as w2v
-#from gensim.models import Doc2Vec as d2v
-#import logging
-import nltk.data
 from textblob import TextBlob
 from math import log
 import numpy as np
@@ -48,23 +44,6 @@ def isValid(input_args):
         return False
 
     return True
-
-def getSentences(JSON_files):
-    '''
-    Given a list of JSON files where each JSON file has a dictionary
-    'paragraphs' which is a list of the paragraphs in the article
-    represented by that JSON file, this function returns a list
-    of all the sentences (each sentence will bea list of all the
-    words/characters in it) in all the paragraphs of all the JSON files
-    '''
-    all_sentences = []
-    for json in JSON_files:
-        paragraphs = json['paragraphs']
-        for paragraph in paragraphs:
-            tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-            sentence = ''.join(tokenizer.tokenize(paragraph))
-            all_sentences.append([i for i in sentence.split(' ')])
-    return all_sentences
 
 def getDocuments(JSON_files):
     '''
@@ -246,7 +225,8 @@ def main(argv):
                                                        random_state=0)
 
     # Get the indices of the training examples and the testing examples
-    # in document_vectors
+    # in document_vectors. train_ex_idxs[i] = y, where
+    #                      X_train[i] = document_vectors[y]
     train_ex_idxs = [document_vectors.index(i) for i in X_train]
     test_ex_idxs = [document_vectors.index(i) for i in X_test]
 
@@ -262,9 +242,17 @@ def main(argv):
         nearest_docs = [X_train[j] for j in nearest_docs_idxs]
         nearest_docs_labels = [y_train[j] for j in nearest_docs_idxs]
 
+        # Get the number of sentences in the test document
+        test_document = documents_and_labels[test_ex_idxs[i]][0]
+        test_document = TextBlob(test_document)
+        num_sentences_in_test = len(test_document.sentences)
+
         # Reduce the dimensionality of the nearest_docs to be equal to
         # the number of sentences in the current test doc
-        pca = PCA(n_components = )
+        pca = PCA(n_components = num_sentences_in_test)
+        pca.fit(X_train)
+        X_train = pca.transform(X_train)
+
 
 
 if __name__ == "__main__":
