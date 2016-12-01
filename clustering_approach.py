@@ -10,6 +10,8 @@ from sklearn.cluster import AffinityPropagation
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import euclidean
 from sklearn.decomposition import PCA
+from sklearn.model_selection import ShuffleSplit
+from sklearn.svm import SVC
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
@@ -188,6 +190,14 @@ def getNearestDocuments(target, documents):
 
     return documents_in_each_cluster[target_cluster_idx]
 
+def getNumSentences(documents):
+    '''
+    Given a list of documents, this function returns a list where
+    the list[i] = the number of sentences in the document in
+    documents[i]
+    '''
+    documents = makeBlobs(documents)
+    return [len(document.sentences) for document in documents]
 
 def main(argv):
     '''
@@ -214,10 +224,61 @@ def main(argv):
     document_vectors = makeDocumentVectors(documents_and_labels)
     labels = [documents_and_labels[i][1] for i in range(len(documents_and_labels))]
 
-    for i in range(len(document_vectors)):
-        print getNearestDocuments(document_vectors[i], document_vectors)
+    # Get the number of sentences in the documents
+    num_sentences = getNumSentences(documents_and_labels)
 
+    # Keep track of the number of examples classified & the ones that were
+    # wrongly predicted
+    num_predictions = 0
+    num_wrong = 0
 
+    # Shuffle and split the data
+    rs = ShuffleSplit(n_splits=1, train_size=0.8, test_size=0.2)
+    for train_idx, test_idx in rs.split(document_vectors):
+        # Get the training data
+        X_train = [document_vectors[i] for i in train_idx]
+        y_train = [labels[i] for i in train_idx]
+
+        # Get the test data
+        X_test = [document_vectors[j] for j in test_idx]
+        y_test = [labels[j] for j in test_idx]
+
+        # Get the number of sentences in each of the test examples
+        num_sentences_in_test = [num_sentences[i] for i in test_idx]
+
+        # Train a classifier for each test example
+        for test_ex_idx in range(len(X_test)):
+            # Get the test example and the number of sentences in it
+            test_example = X_test[test_ex_idx]
+            test_example_label = y_test[test_ex_idx]
+            num_sen = num_sentences_in_test[test_ex_idx]
+
+            # Use PCA to bring down the dimensionality of the training data
+            # to the number of sentences in this particular test example
+            # then reduce the test example 
+            try:
+                pca = PCA(n_components = num_sen)
+                pca.fit(X_train)
+                X_train = pca.transform(X_train)
+                test_example = pca.transform(test_example)
+            except:
+                pca = PCA(n_components = 11)
+                pca.fit(X_train)
+                X_train = pca.transform(X_train)
+                test_example = pca.transform(test_example)
+            for i in X_train:
+                print len(i)
+
+            # Train a classifier and predict the label
+            clf = SVC(kernel='poly', degree=3)
+            clf.fit(X_train, y_train)
+            prediction = clf.predict([test_example])
+            num_predictions += 1
+
+            if(prediction != test_example_label):
+                num_wrong += 1
+
+    print float(num_wrong)/num_predictions
 
 if __name__ == "__main__":
     main(sys.argv[1:])
