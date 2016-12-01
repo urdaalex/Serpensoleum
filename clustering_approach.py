@@ -9,8 +9,6 @@ import numpy as np
 from sklearn.cluster import AffinityPropagation
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import euclidean
-from sklearn.utils import shuffle
-from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
 
 # Split paragraphs by this token in order to easily retrieve them
@@ -216,42 +214,8 @@ def main(argv):
     document_vectors = makeDocumentVectors(documents_and_labels)
     labels = [documents_and_labels[i][1] for i in range(len(documents_and_labels))]
 
-    # Shuffle the data, include random state for reproducibility
-    X, y = shuffle(document_vectors, labels, random_state=0)
-
-    # Split the data (20% of data going into the test set)
-    # include random state for reproducibility
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20,
-                                                       random_state=0)
-
-    # Get the indices of the training examples and the testing examples
-    # in document_vectors. train_ex_idxs[i] = y, where
-    #                      X_train[i] = document_vectors[y]
-    train_ex_idxs = [document_vectors.index(i) for i in X_train]
-    test_ex_idxs = [document_vectors.index(i) for i in X_test]
-
-    # Go over each test example and predict the label using the clustering
-    # approach
-    for i in range(len(X_test)):
-        # Get the information for the current test example
-        cur_test_doc = X_test[i]
-        cur_test_doc_label = y_test[i]
-
-        # Get the nearest documents to the current test example
-        nearest_docs_idxs = getNearestDocuments(cur_test_doc, X_train)
-        nearest_docs = [X_train[j] for j in nearest_docs_idxs]
-        nearest_docs_labels = [y_train[j] for j in nearest_docs_idxs]
-
-        # Get the number of sentences in the test document
-        test_document = documents_and_labels[test_ex_idxs[i]][0]
-        test_document = TextBlob(test_document)
-        num_sentences_in_test = len(test_document.sentences)
-
-        # Reduce the dimensionality of the nearest_docs to be equal to
-        # the number of sentences in the current test doc
-        pca = PCA(n_components = num_sentences_in_test)
-        pca.fit(X_train)
-        X_train = pca.transform(X_train)
+    for i in range(len(document_vectors)):
+        print getNearestDocuments(document_vectors[i], document_vectors)
 
 
 
