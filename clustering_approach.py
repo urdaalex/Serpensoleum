@@ -270,7 +270,7 @@ def main(argv):
             # Train a classifier and predict the label
             clf = SVC(kernel='poly', degree=3)
             clf.fit(X_train, y_train)
-            prediction = clf.predict([test_example])
+            prediction = clf.predict(test_example)
             num_predictions += 1
 
             if(prediction != test_example_label):
