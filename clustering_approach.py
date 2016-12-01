@@ -262,7 +262,7 @@ def main(argv):
                 X_train = pca.transform(X_train)
                 test_example = pca.transform(test_example)
             except:
-                pca = PCA(n_components = 11)
+                pca = PCA(n_components = 8)
                 pca.fit(X_train)
                 X_train = pca.transform(X_train)
                 test_example = pca.transform(test_example)
@@ -274,6 +274,7 @@ def main(argv):
             num_predictions += 1
 
             if(prediction != test_example_label):
+                print 'WRONG'
                 num_wrong += 1
 
     print float(num_wrong)/num_predictions
