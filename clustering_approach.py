@@ -255,7 +255,7 @@ def main(argv):
 
             # Use PCA to bring down the dimensionality of the training data
             # to the number of sentences in this particular test example
-            # then reduce the test example 
+            # then reduce the test example
             try:
                 pca = PCA(n_components = num_sen)
                 pca.fit(X_train)
@@ -266,8 +266,6 @@ def main(argv):
                 pca.fit(X_train)
                 X_train = pca.transform(X_train)
                 test_example = pca.transform(test_example)
-            for i in X_train:
-                print len(i)
 
             # Train a classifier and predict the label
             clf = SVC(kernel='poly', degree=3)
