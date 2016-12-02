@@ -266,6 +266,7 @@ def main(argv):
                 pca.fit(X_train)
                 X_train = pca.transform(X_train)
                 test_example = pca.transform(test_example)
+            X_train = [X_train[i][:] for i in range(len(X_train))]
 
             # Train a classifier and predict the label
             clf = SVC(kernel='poly', degree=3)
