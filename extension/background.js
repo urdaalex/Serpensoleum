@@ -21,23 +21,6 @@
      }
  });
 
-
- // function messageListener(request, sender, sendResponse) {
- //     chrome.storage.sync.get('enabledStatus', function(obj) {
- //         if (obj.enabledStatus == null) {
- //             obj["enabledStatus"] = true;
- //         }
-
- //         sendResponse({ state: obj.enabledStatus });
- //     });
-
- //     return true;
- //     // sendResponse({ state: chrome.storage.sync.get('enabledStatus') });
- // }
-
- // chrome.runtime.onMessage.addListener(messageListener);
-
-
  function broadcastAllTabs() {
      chrome.tabs.query({}, function(tabs) {
          var message = { action: "stop" };

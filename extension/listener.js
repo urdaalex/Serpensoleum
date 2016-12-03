@@ -124,12 +124,14 @@ function deferQuery(method, time) {
 
 function deferResultIteration(method, time) {
     var currentQuery = googleURLToQuery(window.location.href);
+    currentQuery = currentQuery.replace(/\+/g, " ")
     var iresDiv = $("#ires");
     var iresQuery = "";
 
     if (iresDiv != null) {
         if (iresDiv.attr('data-async-context') != null) {
             iresQuery = iresDiv.attr('data-async-context').split("query:")[1];    
+            iresQuery = decodeURI(iresQuery);
         }
     }
 

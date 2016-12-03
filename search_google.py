@@ -22,7 +22,7 @@ Usage search-python QUERY [OUTPUT_FOLDER]
 """
 
 
-
+import cookielib
 import pprint
 import sys
 import urllib2
@@ -99,9 +99,11 @@ def get_url(url):
        'Accept-Language': 'en-US,en;q=0.8',
        'Connection': 'keep-alive'}
   req = urllib2.Request(url, headers=fake_hdr)
-
+  cj = cookielib.CookieJar()
+  opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
   try:
-    res = urllib2.urlopen(req, timeout=5)
+    # res = urllib2.urlopen(req, timeout=5)
+    res = opener.open(req, timeout=5)
     content = res.read()
     return content
 

@@ -1,28 +1,5 @@
 'use strict'
 
-// var port = chrome.runtime.connect({name: "enableDisable"});
-// port.postMessage({check: "Is enbaled?"});
-// port.onMessage.addListener(function(msg) {
-//   if (msg.response == false)
-//     // port.postMessage({answer: "Madame"});
-//  removeAllScripts();
-//   else if (msg.question == "Madame who?")
-//     // port.postMessage({answer: "Madame... Bovary"});
-//  injectAllScripts();
-// });
-
-// function onRequest(request) {
-//     if (request.action == 'start')
-//         // startExtension()
-//      injectAllScripts(); 
-//     else if (request.action == 'stop')
-//         // stopExtension()
-//      removeAllScripts();
-//     sendResponse({});
-// }
-
-// chrome.extension.onMessage.addListener(onRequest);
-
 var cs_to_background_port = chrome.extension.connect({
     name: "cs_to_background"
 });
