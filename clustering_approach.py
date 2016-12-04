@@ -228,8 +228,8 @@ def main(argv):
         # Get all document vectors & the labels
         document_vectors = makeDocumentVectors(documents_and_labels)
         labels = [documents_and_labels[i][1] for i in range(len(documents_and_labels))]
-
-        with open('processed_clustering.pickle', 'w') as pic:
+        name = 'processed_' + argv[1] + '.pickle'
+        with open(name, 'w') as pic:
             pickle.dump((documents_and_labels, document_vectors, labels) ,pic)
 
     # Get the number of sentences in the documents
