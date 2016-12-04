@@ -211,18 +211,26 @@ def main(argv):
     if not isValid(argv):
         sys.exit(1)
 
-    # Load a list of the JSON files in the input dir
-    JSON_files = []
-    for filename in os.listdir(argv[0]):
-        with open(os.path.join(argv[0], filename), 'r') as json_file:
-            JSON_files.append(simplejson.load(json_file))
+    if(argv[0].split('.')[-1] == 'pickle'):
+        with open (argv[0], 'r') as pic:
+            documents_and_labels, document_vectors, labels = \
+                pickle.load(pic)
+    else:
+        # Load a list of the JSON files in the input dir
+        JSON_files = []
+        for filename in os.listdir(argv[0]):
+            with open(os.path.join(argv[0], filename), 'r') as json_file:
+                JSON_files.append(simplejson.load(json_file))
 
-    # Get all the documents in the JSON files
-    documents_and_labels = getDocuments(JSON_files)
+        # Get all the documents in the JSON files
+        documents_and_labels = getDocuments(JSON_files)
 
-    # Get all document vectors & the labels
-    document_vectors = makeDocumentVectors(documents_and_labels)
-    labels = [documents_and_labels[i][1] for i in range(len(documents_and_labels))]
+        # Get all document vectors & the labels
+        document_vectors = makeDocumentVectors(documents_and_labels)
+        labels = [documents_and_labels[i][1] for i in range(len(documents_and_labels))]
+
+        with open('processed_clustering.pickle', 'w') as pic:
+            pickle.dump((documents_and_labels, document_vectors, labels) ,pic)
 
     # Get the number of sentences in the documents
     num_sentences = getNumSentences(documents_and_labels)
