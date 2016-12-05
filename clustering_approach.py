@@ -12,6 +12,7 @@ from scipy.spatial.distance import euclidean
 from sklearn.decomposition import PCA
 from sklearn.model_selection import ShuffleSplit
 from sklearn.svm import SVC
+from random import randint
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
@@ -57,11 +58,12 @@ def getDocuments(JSON_files):
     for json in JSON_files:
         paragraphs = json['paragraphs']
         label = json['actual-search-type']
+        title = json['title']
         document = ''
         for paragraph in paragraphs[:-1]:
             document += paragraph + paragraph_splitter
         document += paragraphs[-1]
-        all_documents.append((document, label))
+        all_documents.append((document, label, title))
     return all_documents
 
 def getTf(word, document):
@@ -232,61 +234,8 @@ def main(argv):
         with open(name, 'w') as pic:
             pickle.dump((documents_and_labels, document_vectors, labels) ,pic)
 
-    # Get the number of sentences in the documents
-    num_sentences = getNumSentences(documents_and_labels)
-
-    # Keep track of the number of examples classified & the ones that were
-    # wrongly predicted
-    num_predictions = 0
-    num_wrong = 0
-
-    # Shuffle and split the data
-    rs = ShuffleSplit(n_splits=1, train_size=0.8, test_size=0.2)
-    for train_idx, test_idx in rs.split(document_vectors):
-        # Get the training data
-        X_train = [document_vectors[i] for i in train_idx]
-        y_train = [labels[i] for i in train_idx]
-
-        # Get the test data
-        X_test = [document_vectors[j] for j in test_idx]
-        y_test = [labels[j] for j in test_idx]
-
-        # Get the number of sentences in each of the test examples
-        num_sentences_in_test = [num_sentences[i] for i in test_idx]
-
-        # Train a classifier for each test example
-        for test_ex_idx in range(len(X_test)):
-            # Get the test example and the number of sentences in it
-            test_example = X_test[test_ex_idx]
-            test_example_label = y_test[test_ex_idx]
-            num_sen = num_sentences_in_test[test_ex_idx]
-
-            # Use PCA to bring down the dimensionality of the training data
-            # to the number of sentences in this particular test example
-            # then reduce the test example
-            try:
-                pca = PCA(n_components = num_sen)
-                pca.fit(X_train)
-                X_train = pca.transform(X_train)
-                test_example = pca.transform(test_example)
-            except:
-                pca = PCA(n_components = 8)
-                pca.fit(X_train)
-                X_train = pca.transform(X_train)
-                test_example = pca.transform(test_example)
-            X_train = [X_train[i][:] for i in range(len(X_train))]
-
-            # Train a classifier and predict the label
-            clf = SVC(kernel='poly', degree=3)
-            clf.fit(X_train, y_train)
-            prediction = clf.predict(test_example)
-            num_predictions += 1
-
-            if(prediction != test_example_label):
-                print 'WRONG'
-                num_wrong += 1
-
-    print float(num_wrong)/num_predictions
+    # Running on a test example
+    test_idx = randint(0, len(document_vectors)-1)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
