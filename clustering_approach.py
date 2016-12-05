@@ -288,7 +288,7 @@ def main(argv):
         # Get the sentences & their labels (the document label) from the
         # nearest_dox_label_title
         nearest_sent_label_title = getSentences(nearest_dox_label_title)
-        sentence_vectors = makeSentenceVectors(nearest_sent_label_title)
+        train_sentence_vectors = makeSentenceVectors(nearest_sent_label_title)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
