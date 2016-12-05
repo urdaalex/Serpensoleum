@@ -244,16 +244,16 @@ def main(argv):
         train_document_vectors = document_vectors[:test_idx] + document_vectors[test_idx+1:]
 
         # Cluster the test document and get its nearest documents
-        print len(test_document_vector)
         nearest_neighbours_idxs = getNearestDocuments(test_document_vector, train_document_vectors)
         nearest_dox_label_title = [train_dox_label_title[i] for i in nearest_neighbours_idxs]
 
         '''
         # Print the test article name and the names of the nearest nearest documents
-        print 'Test Document Name: ' + test_dox_label_title[-1]
+        print 'Test Document Name: ' + test_dox_label_title[-1].strip('\n')
         for i in range(len(nearest_neighbours_idxs)):
-            print 'Nearest document #' + str(i) + ': ' + nearest_dox_label_title[i][-1]
+            print 'Nearest document #' + str(i) + ': ' + nearest_dox_label_title[i][-1].strip('\n')
         '''
+        
 
 if __name__ == "__main__":
     main(sys.argv[1:])
