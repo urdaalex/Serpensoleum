@@ -206,6 +206,32 @@ def getSentences(documents):
             sentences.append((doc_sent, label, title))
     return sentences
 
+def makeSentenceVectors(all_sentences):
+    '''
+    Given a list of all sentences, this function returns a list of the sentences
+    in TF-ISF form
+    '''
+    only_sentences = [all_sentences[i][0] for i in range(len(all_sentences))]
+    sentence_vectors = []
+
+    max_length = -1 * float('inf')
+    max_idx = -1
+    for sent in only_sentences:
+        sent_vector = []
+        for word in sent.words:
+            tf_isf = getTfIdf(word, sent, only_sentences)
+            sent_vector.append(tf_isf)
+        if len(sent_vector) > max_length:
+            max_length = len(sent_vector)
+        sentence_vectors.append(np.array(sent_vector))
+
+    # Ensure that each tf-isf vector has the same dimensionality
+    # by padding with 0's
+    for i in range(len(sentence_vectors)):
+        sentence_vectors[i] = np.append(sentence_vectors[i], [0] * (max_length - len(sentence_vectors[i])))
+
+    return sentence_vectors
+
 def main(argv):
     '''
     Given the array of arguments to the program, the main method will ensure
@@ -261,7 +287,8 @@ def main(argv):
 
         # Get the sentences & their labels (the document label) from the
         # nearest_dox_label_title
-        nearest_sent_label = getSentences(nearest_dox_label_title)
+        nearest_sent_label_title = getSentences(nearest_dox_label_title)
+        sentence_vectors = makeSentenceVectors(nearest_sent_label_title)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
