@@ -192,14 +192,19 @@ def getNearestDocuments(target, documents):
 
     return documents_in_each_cluster[target_cluster_idx]
 
-def getNumSentences(documents):
+def getSentences(documents):
     '''
-    Given a list of documents, this function returns a list where
-    the list[i] = the number of sentences in the document in
-    documents[i]
+    Given a list of documents[i] = (document_i, label_i, title_i), this function
+    returns a list of sentences[i] = (sentence_i, label_i) where label_i
+    is the label of document_i iff sentence_i is a sentence in document_i
     '''
-    documents = makeBlobs(documents)
-    return [len(document.sentences) for document in documents]
+    sentences = []
+    for doc, label, title in documents:
+        doc = TextBlob(doc)
+        doc_sents = doc.sentences
+        for doc_sent in doc_sents:
+            sentences.append((doc_sent, label, title))
+    return sentences
 
 def main(argv):
     '''
@@ -253,7 +258,10 @@ def main(argv):
         for i in range(len(nearest_neighbours_idxs)):
             print 'Nearest document #' + str(i) + ': ' + nearest_dox_label_title[i][-1].strip('\n')
         '''
-        
+
+        # Get the sentences & their labels (the document label) from the
+        # nearest_dox_label_title
+        nearest_sent_label = getSentences(nearest_dox_label_title)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
