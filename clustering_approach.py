@@ -215,7 +215,7 @@ def main(argv):
 
     if(argv[0].split('.')[-1] == 'pickle'):
         with open (argv[0], 'r') as pic:
-            documents_and_labels, document_vectors, labels = \
+            dox_label_title, document_vectors, labels = \
                 pickle.load(pic)
     else:
         # Load a list of the JSON files in the input dir
@@ -225,17 +225,35 @@ def main(argv):
                 JSON_files.append(simplejson.load(json_file))
 
         # Get all the documents in the JSON files
-        documents_and_labels = getDocuments(JSON_files)
+        dox_label_title = getDocuments(JSON_files)
 
         # Get all document vectors & the labels
-        document_vectors = makeDocumentVectors(documents_and_labels)
-        labels = [documents_and_labels[i][1] for i in range(len(documents_and_labels))]
+        document_vectors = makeDocumentVectors(dox_label_title)
+        labels = [dox_label_title[i][1] for i in range(len(dox_label_title))]
         name = 'processed_' + argv[1] + '.pickle'
         with open(name, 'w') as pic:
-            pickle.dump((documents_and_labels, document_vectors, labels) ,pic)
+            pickle.dump((dox_label_title, document_vectors, labels) ,pic)
 
-    # Running on a test example
-    test_idx = randint(0, len(document_vectors)-1)
+    num_test_cases = 1
+    for i in range(num_test_cases):
+        # Get random test example and train data for it
+        test_idx = randint(0, len(document_vectors)-1)
+        test_dox_label_title = dox_label_title[test_idx]
+        test_document_vector = document_vectors[test_idx]
+        train_dox_label_title = dox_label_title[:test_idx] + dox_label_title[test_idx+1:]
+        train_document_vectors = document_vectors[:test_idx] + document_vectors[test_idx+1:]
+
+        # Cluster the test document and get its nearest documents
+        print len(test_document_vector)
+        nearest_neighbours_idxs = getNearestDocuments(test_document_vector, train_document_vectors)
+        nearest_dox_label_title = [train_dox_label_title[i] for i in nearest_neighbours_idxs]
+
+        '''
+        # Print the test article name and the names of the nearest nearest documents
+        print 'Test Document Name: ' + test_dox_label_title[-1]
+        for i in range(len(nearest_neighbours_idxs)):
+            print 'Nearest document #' + str(i) + ': ' + nearest_dox_label_title[i][-1]
+        '''
 
 if __name__ == "__main__":
     main(sys.argv[1:])
