@@ -290,5 +290,44 @@ def main(argv):
         nearest_sent_label_title = getSentences(nearest_dox_label_title)
         train_sentence_vectors = makeSentenceVectors(nearest_sent_label_title)
 
+        # Get a list where list[i] = vector_form_of_sentence_i for the
+        # test document
+        max_sent_length = -1*float('inf')
+        test_sentences_tfisf = []
+        test_doc_sentences = TextBlob(test_dox_label_title[0]).sentences
+        for sent in test_doc_sentences:
+            sent_vector = np.array([])
+            for word in sent.words:
+                word_tfisf = getTfIdf(word, sent, test_doc_sentences)
+                sent_vector = np.append(sent_vector, word_tfisf)
+            if len(sent_vector) > max_sent_length:
+                max_sent_length = len(sent_vector)
+            test_sentences_tfisf.append(sent_vector)
+
+        # Make sure all sentence vectors have the same length by padding
+        for i in range(len(test_sentences_tfisf)):
+            test_sentences_tfisf[i] = np.append(test_sentences_tfisf[i], [0] * (max_sent_length - len(test_sentences_tfisf[i])))
+
+        # Need to make sure all test sentences and all train sentences have the same length
+        larger_length = max(len(test_sentences_tfisf[0]), len(train_sentence_vectors[0]))
+        if len(test_sentences_tfisf[0]) > len(train_sentence_vectors[0]):
+            # pad the train vectors
+            for i in range(len(train_sentence_vectors)):
+                train_sentence_vectors[i] = np.append(train_sentence_vectors[i], [0] * (larger_length - len(train_sentence_vectors[i])))
+        elif len(train_sentence_vectors[0]) > len(test_sentences_tfisf[0]):
+            # pad the test
+            for i in range(len(test_sentences_tfisf)):
+                test_sentences_tfisf[i] = np.append(test_sentences_tfisf[i], [0] * (larger_length - len(test_sentences_tfisf[i])))
+
+        # Now we can get nearest sentences for each sentence in test sentence
+        for i in range(len(test_doc_sentences)):
+            test_sentence = test_doc_sentences[i]
+            test_sent_vector = test_sentences_tfisf[i]
+            nearest_sentences_idxs = getNearestDocuments(test_sent_vector, train_sentence_vectors)
+            
+            print 'Test Sentence: ' + str(test_sentence)
+            for j in range(len(nearest_sentences_idxs)):
+                jth_nearest_sentence = nearest_sent_label_title[nearest_sentences_idxs[j]][0]
+                print 'Nearest sentences #' + str(j) + ': ' + str(jth_nearest_sentence)
 if __name__ == "__main__":
     main(sys.argv[1:])
