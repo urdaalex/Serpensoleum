@@ -9,10 +9,10 @@ import numpy as np
 from sklearn.cluster import AffinityPropagation
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import euclidean
-from sklearn.decomposition import PCA
 from sklearn.model_selection import ShuffleSplit
 from sklearn.svm import SVC
 from random import randint
+from scipy import stats
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
@@ -341,9 +341,9 @@ def main(argv):
             print prediction,
             print test_dox_label_title[1]
             print '---'
-            predictions.append(prediction)
+            predictions = np.append(predictions, prediction)
 
-        print 'Predicted document label: ' + str(max(set(predictions), key=predictions.count))
+        print 'Predicted document label: ' + str(stats.mode(predictions)[0][0])
         print 'Actual document label: ' + str(test_dox_label_title[1])
 
 
