@@ -319,15 +319,33 @@ def main(argv):
             for i in range(len(test_sentences_tfisf)):
                 test_sentences_tfisf[i] = np.append(test_sentences_tfisf[i], [0] * (larger_length - len(test_sentences_tfisf[i])))
 
+        # Train a classifier on the sentences in the nearest documents
+        clf = SVC(kernel="poly", degree=3)
+        clf.fit(train_sentence_vectors, [nearest_sent_label_title[i][1] for i in range(len(nearest_sent_label_title))])
+
         # Now we can get nearest sentences for each sentence in test sentence
         for i in range(len(test_doc_sentences)):
             test_sentence = test_doc_sentences[i]
             test_sent_vector = test_sentences_tfisf[i]
             nearest_sentences_idxs = getNearestDocuments(test_sent_vector, train_sentence_vectors)
-            
+            '''
             print 'Test Sentence: ' + str(test_sentence)
             for j in range(len(nearest_sentences_idxs)):
                 jth_nearest_sentence = nearest_sent_label_title[nearest_sentences_idxs[j]][0]
                 print 'Nearest sentences #' + str(j) + ': ' + str(jth_nearest_sentence)
+            '''
+            predictions = []
+
+            # predict the label for this sentence
+            prediction = clf.predict(test_sent_vector.reshape(1, -1))
+            print prediction,
+            print test_dox_label_title[1]
+            print '---'
+            predictions.append(prediction)
+
+        print 'Predicted document label: ' + str(max(set(predictions), key=predictions.count))
+        print 'Actual document label: ' + str(test_dox_label_title[1])
+
+
 if __name__ == "__main__":
     main(sys.argv[1:])
