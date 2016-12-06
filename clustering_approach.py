@@ -336,12 +336,17 @@ def main(argv):
             clf = SVC(kernel="poly", degree=3)
             train_sentences = [train_sentence_vectors[nearest_sentences_idxs[i]] for i in range(len(nearest_sentences_idxs))]
             train_sent_labels = [nearest_sent_label_title[nearest_sentences_idxs[j]][1] for j in range(len(nearest_sentences_idxs))]
-            assert len(train_sentences) == len(train_sent_labels)
-            clf.fit(train_sentences, train_sent_labels)
-            predictions = []
 
-            # predict the label for this sentence
-            prediction = clf.predict(test_sent_vector.reshape(1, -1))
+            # If all of the sentences that fall into the same cluster have the same label,
+            # then the prediction should be that label
+            predictions = []
+            if(len(set(train_sent_labels)) <= 1):
+                prediction = train_sent_labels[0]
+            else:
+                clf.fit(train_sentences, train_sent_labels)
+                # predict the label for this sentence
+                prediction = clf.predict(test_sent_vector.reshape(1, -1))
+
             print prediction,
             print test_dox_label_title[1]
             print '---'
