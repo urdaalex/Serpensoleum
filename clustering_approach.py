@@ -19,7 +19,7 @@ from scipy import stats
 paragraph_splitter = "\n\n--\n\n"
 
 '''
-NOTE:
+NOTE
     The input data has to be parsed using the html parser AND processed
     by the preprocessor
 '''
