@@ -11,7 +11,7 @@ from sklearn.cluster import KMeans
 from scipy.spatial.distance import euclidean
 from sklearn.model_selection import ShuffleSplit
 from sklearn.svm import SVC
-from random import randint
+from random import sample
 from scipy import stats
 
 # Split paragraphs by this token in order to easily retrieve them
@@ -266,9 +266,10 @@ def main(argv):
             pickle.dump((dox_label_title, document_vectors, labels) ,pic)
 
     num_test_cases = 1
+    test_idxs = sample(range(0, len(document_vectors)-1), num_test_cases)
     for i in range(num_test_cases):
         # Get random test example and train data for it
-        test_idx = randint(0, len(document_vectors)-1)
+        test_idx = test_idxs[i]
         test_dox_label_title = dox_label_title[test_idx]
         test_document_vector = document_vectors[test_idx]
         train_dox_label_title = dox_label_title[:test_idx] + dox_label_title[test_idx+1:]
