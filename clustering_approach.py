@@ -267,7 +267,7 @@ def main(argv):
 
     num_correct = 0
     num_test_cases = 5
-    test_idxs = sample(range(0, len(document_vectors)-1), num_test_cases)
+    test_idxs = sample(range(0, len(document_vectors)), num_test_cases)
     for i in range(num_test_cases):
         # Get random test example and train data for it
         test_idx = test_idxs[i]
