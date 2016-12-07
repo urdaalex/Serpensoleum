@@ -321,6 +321,7 @@ def main(argv):
             for i in range(len(test_sentences_tfisf)):
                 test_sentences_tfisf[i] = np.append(test_sentences_tfisf[i], [0] * (larger_length - len(test_sentences_tfisf[i])))
 
+        predictions = []
         # Now we can get nearest sentences for each sentence in test sentence
         for i in range(len(test_doc_sentences)):
             test_sentence = test_doc_sentences[i]
@@ -341,7 +342,6 @@ def main(argv):
 
             # If all of the sentences that fall into the same cluster have the same label,
             # then the prediction should be that label
-            predictions = []
             if(len(set(train_sent_labels)) <= 1):
                 prediction = train_sent_labels[0]
             else:
