@@ -265,7 +265,8 @@ def main(argv):
         with open(name, 'w') as pic:
             pickle.dump((dox_label_title, document_vectors, labels) ,pic)
 
-    num_test_cases = 1
+    num_correct = 0
+    num_test_cases = 5
     test_idxs = sample(range(0, len(document_vectors)-1), num_test_cases)
     for i in range(num_test_cases):
         # Get random test example and train data for it
@@ -355,6 +356,10 @@ def main(argv):
 
         print 'Predicted document label: ' + str(stats.mode(predictions)[0][0])
         print 'Actual document label: ' + str(test_dox_label_title[1])
+        if(stats.mode(predictions)[0][0] == test_dox_label_title[1]):
+            num_correct += 1
+
+    print "Classification accuracy: " + str(float(num_correct)/num_test_cases)
 
 
 if __name__ == "__main__":
