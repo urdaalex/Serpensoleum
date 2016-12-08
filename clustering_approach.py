@@ -9,7 +9,6 @@ import numpy as np
 from sklearn.cluster import AffinityPropagation
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import euclidean
-from sklearn.model_selection import ShuffleSplit
 from sklearn.svm import SVC
 from random import sample
 from scipy import stats
@@ -240,33 +239,39 @@ def main(argv):
     on the data in the input directory. The model will then be saved
     into a pickle file specified by the input arguments
     '''
-    # Check that the input arguments are valid
-    if not isValid(argv):
-        sys.exit(1)
-
-    if(argv[0].split('.')[-1] == 'pickle'):
-        with open (argv[0], 'r') as pic:
+    for_moe = True # Bool to indicate if this is for moe running on server
+    if (for_moe):
+        with open ('tfidf_documents.pickle', 'r') as pic:
             dox_label_title, document_vectors, labels = \
                 pickle.load(pic)
     else:
-        # Load a list of the JSON files in the input dir
-        JSON_files = []
-        for filename in os.listdir(argv[0]):
-            with open(os.path.join(argv[0], filename), 'r') as json_file:
-                JSON_files.append(simplejson.load(json_file))
+        # Check that the input arguments are valid
+        if not isValid(argv):
+            sys.exit(1)
 
-        # Get all the documents in the JSON files
-        dox_label_title = getDocuments(JSON_files)
+        if(argv[0].split('.')[-1] == 'pickle'):
+            with open (argv[0], 'r') as pic:
+                dox_label_title, document_vectors, labels = \
+                    pickle.load(pic)
+        else:
+            # Load a list of the JSON files in the input dir
+            JSON_files = []
+            for filename in os.listdir(argv[0]):
+                with open(os.path.join(argv[0], filename), 'r') as json_file:
+                    JSON_files.append(simplejson.load(json_file))
 
-        # Get all document vectors & the labels
-        document_vectors = makeDocumentVectors(dox_label_title)
-        labels = [dox_label_title[i][1] for i in range(len(dox_label_title))]
-        name = 'processed_' + argv[1] + '.pickle'
-        with open(name, 'w') as pic:
-            pickle.dump((dox_label_title, document_vectors, labels) ,pic)
+            # Get all the documents in the JSON files
+            dox_label_title = getDocuments(JSON_files)
+
+            # Get all document vectors & the labels
+            document_vectors = makeDocumentVectors(dox_label_title)
+            labels = [dox_label_title[i][1] for i in range(len(dox_label_title))]
+            name = 'processed_' + argv[1] + '.pickle'
+            with open(name, 'w') as pic:
+                pickle.dump((dox_label_title, document_vectors, labels) ,pic)
 
     num_correct = 0
-    num_test_cases = 5
+    num_test_cases = 30
     test_idxs = sample(range(0, len(document_vectors)), num_test_cases)
     for i in range(num_test_cases):
         # Get random test example and train data for it
