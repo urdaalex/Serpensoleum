@@ -64,6 +64,12 @@ def get_category():
 
 
 def load_document(path):
+    '''
+    Given a path to a JSON file, the json object is returned
+    
+    Attributes:
+        path (str): Path to JSON file
+    '''
     with open(path) as json_data:
         document = json.load(json_data)
     return document

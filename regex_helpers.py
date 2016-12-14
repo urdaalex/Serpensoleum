@@ -10,6 +10,13 @@ PUNCTUATION_PATTERN = r'[^\?|\.|\!][\?|\.|\!]{1}$'
 GARBAGE = [PHONE_NUMBER_PATTERN, COPYRIGHT_PATTERN]
 
 def check_text_for_garbage(text, patterns=[]):
+    '''
+    Given text and a set of patterns, it search for the patterns.
+
+    Attributes:
+        text (str): The text to be searched.
+        patterns (list): List of patterns to be used in the search
+    '''
     for pattern in patterns:
         pattern = re.compile(pattern, re.IGNORECASE)
         if pattern.search(text) != None:
@@ -19,6 +26,12 @@ def check_text_for_garbage(text, patterns=[]):
     return False
 
 def check_ends_with_punctuation(text):
+    '''
+    Checks if the input text ends with punctuation
+
+    Attributes:
+        text (str): The input text.
+    '''
     pattern = re.compile(PUNCTUATION_PATTERN)
 
     if pattern.search(text) != None:
@@ -27,4 +40,10 @@ def check_ends_with_punctuation(text):
     return False
 
 def get_links(text):
+    '''
+    Extracts all the HTML links from input text
+
+    Attributes:
+        text (str): Input text.
+    '''
     pattern = re.compile(URL_PATTERN)

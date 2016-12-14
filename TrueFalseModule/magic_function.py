@@ -17,7 +17,10 @@ MODEL = None
 
 def work_file(doc):
     '''
-    get the (tfidf array) for the file.
+    Get the (tfidf array) for the file.
+
+    Attributes:
+        doc (Object): JSON object of file.
     '''
     documents = []
     body = doc['paragraphs']
@@ -42,6 +45,10 @@ def tf_classifier(jsonfile, model_path=""):
     '''
     Returns 1 if true
     Returns 0 if false
+
+    Attributes:
+        jsonfile (JSON Object): Json File to be passed into model
+        model_path (str): String of path to model
     '''
     # global MODEL
     # if MODEL is None:

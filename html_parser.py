@@ -73,12 +73,25 @@ def main():
 
 
 def load_document(path):
+    '''
+    Given a path to a JSON file, the json object is returned
+    
+    Attributes:
+        path (str): Path to JSON file
+    '''
     with open(path) as json_data:
         document = json.load(json_data)
     return document
 
 
 def save_content(content, path):
+    '''
+    Writes content in path.
+
+    Attributes:
+        content (str): Content to be written
+        path (str): Path to the file to be written.
+    '''
     f = open(path, 'w')
     f.write(content)
     f.close()
