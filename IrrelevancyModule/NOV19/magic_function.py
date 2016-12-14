@@ -13,8 +13,10 @@ from sklearn.linear_model import SGDClassifier
 
 import cPickle
 
+MODEL = None
+
 def averagestuff(array):
-    
+    print(array)
     title = array[0]
     top1 = array[1]
     top5 = np.average(array[1:6])
@@ -32,7 +34,6 @@ def work_file(doc):
     body = doc['paragraphs']
     n_body = []
     for sen in body:
-        #print type(sen)
         n_body.append(sen.lower())
     
     whole_article = [query] + [title] + n_body
@@ -41,17 +42,18 @@ def work_file(doc):
     return toreturn
 
 
-
-
 def check_relevancy_of_document(jsonfile, model_path = ""):
-    print(jsonfile.keys())
-    with open(model_path, 'rb') as fid:
-        model = cPickle.load(fid)
-        
     X = [work_file(jsonfile)]
-    irrelevant = model.predict(X)
+    irrelevant = MODEL.predict(X)
     
     if irrelevant:
         return 0
     
     return 1
+
+
+def pre_load_model(model_path):
+    global MODEL
+
+    with open(model_path, 'rb') as fid:
+        MODEL = cPickle.load(fid)

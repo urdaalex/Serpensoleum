@@ -87,6 +87,10 @@ function removeAllScripts() {
 }
 
 function injectAllScripts() {
+    // var iresDiv = $("#ires");
+    // iresDiv.attr('data-async-context', '');
+
+
     injectScript(chrome.extension.getURL('jquery.js'), 'head', 'Z1Z1Z1Z1');
     injectScript(chrome.extension.getURL('listener.js'), 'head', 'X1X1X1X1');
 }

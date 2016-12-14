@@ -24,9 +24,9 @@ function callPythonScript(url, query, element) {
                 img.setAttribute('src', 'http://static.artuk.org/w944h944/CSF/CSF_FIFE_KIRMG_452_1.jpg');
             }
         } else if (response.validity != null) {
-            if (response.validity == "valid") {
+            if (response.validity == true) {
                 img.setAttribute('src', 'http://www.clker.com/cliparts/e/2/a/d/1206574733930851359Ryan_Taylor_Green_Tick.svg.med.png');
-            } else if (response.validity == "invalid") {
+            } else if (response.validity == false) {
                 img.setAttribute('src', 'http://www.clipartbest.com/cliparts/jix/EyA/jixEyAb5T.png');
             } else {
                 img.setAttribute('src', 'http://static.artuk.org/w944h944/CSF/CSF_FIFE_KIRMG_452_1.jpg');
@@ -51,9 +51,8 @@ var timer = setInterval(function() {
         return;
     }
 
-
     if (justLoaded == true) {
-        if (!window.location.href.startsWith('https://www.google') || window.location.href.indexOf('search?') < 0) {
+        if (!window.location.href.startsWith('https://www.google') ){//|| window.location.href.indexOf('search?') < 0) {
 
         } else {
             setTimeout(function() { deferResultIteration(iterateOverPageResults, 100); }, 200);
@@ -125,6 +124,7 @@ function deferQuery(method, time) {
 function deferResultIteration(method, time) {
     var currentQuery = googleURLToQuery(window.location.href);
     currentQuery = currentQuery.replace(/\+/g, " ")
+    currentQuery = decodeURI(currentQuery);
     var iresDiv = $("#ires");
     var iresQuery = "";
 
@@ -135,7 +135,7 @@ function deferResultIteration(method, time) {
         }
     }
 
-    if ((iresQuery == currentQuery && $('#flyr[class="flyr-o"]').get(0) == null)) { //|| $('#flyr[class="flyr-c"]').get(0) != null) $('#flyr').get(0) == null && $('div[class="g"]').get(0) != null && {
+    if ((iresQuery == currentQuery && $('#flyr[class="flyr-o"]').get(0) == null) || ($('#flyr[class="flyr-c"]').get(0) != null && $('#flyr').get(0) == null)) { //|| $('#flyr[class="flyr-c"]').get(0) != null) $('#flyr').get(0) == null && $('div[class="g"]').get(0) != null && {
         method();
         stillTryingToIterate = false;
     } else {
@@ -143,4 +143,3 @@ function deferResultIteration(method, time) {
         setTimeout(function() { deferResultIteration(method, time) }, time);
     }
 }
-

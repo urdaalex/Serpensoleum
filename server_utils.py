@@ -1,31 +1,17 @@
 from search_google import get_url
-import sys
-from IrrelevancyModule.NOV19.magic_function import check_relevancy_of_document
-# sys.path.insert(0, 'IrrelevancyModule/NOV19/')
-# from magic_function import *
-# from IrrelevancyModule.NOV19.magic_function import magic_function
+import IrrelevancyModule.NOV19.magic_function as irrelevancy_module
+import TrueFalseModule.magic_function as tf_module
 import html_parser as pars
 import traceback
 import os
-import numpy as np
 
 ERROR_PARSING = 5
+IRRELEVANT = 10
 
-def check_website_relevancy(url, query):
-    # if not url.startswith('http'):
-    #     new_url = 'http://' + url
-    #
-    #     try:
-    #         contents = get_url(new_url)
-    #         print("------------------------------Tried Adding http://------------------------------")
-    #         print("To: " + url)
-    #     except:
-    #         new_url = 'https://' + url
-    #         print("------------------------------Tried Adding https://------------------------------")
-    #         print("To: " + url)
-    #         contents = get_url(new_url)
-    # else:
-    #     print("------------------------------Didn't add anything------------------------------")
+
+def classify_website(url, query):
+    start = os.times()[0]
+
     try:
         contents = get_url(url)
     except:
@@ -34,30 +20,39 @@ def check_website_relevancy(url, query):
     if contents == False:
         return ERROR_PARSING
 
+    end = os.times()[0]
+
+    print("Getting the webpage took:")
+    print(end - start)
+
+    start = os.times()[0]
+
     document_template = {"contents": contents, "query": query, "url": url}
 
     parsed_document = pars.parse_document_regex_based_sentences(document_template)[0]
 
-    print("-------------------------request start-------------------------")
-    print("query: " + query)
-    print("url: " + url)
-    print("first 10 chars of contents: " + contents[:9])
-    print("parsed_doc: " + str(parsed_document.keys()))
-    print("-------------------------request end-------------------------")
+    end = os.times()[0]
+    print("Parsing the webpage took:")
+    print(end - start)
 
     try:
-        relevancy_result = check_relevancy_of_document(parsed_document, 'IrrelevancyModule/NOV19/saved_model.pkl')
-        return relevancy_result
+        relevancy_result = irrelevancy_module.check_relevancy_of_document(parsed_document)
+        if relevancy_result == True:
+            return tf_module.tf_classifier(parsed_document)
+        else:
+            return IRRELEVANT
     except:
         traceback.print_exc()
         return ERROR_PARSING
 
-def check_website_validity():
-    return False
-# def magic_function(doc):
-#     x = np.random.rand(1,1)
-#
-#     if x <= 0.5:
-#         return False
-#     else:
-#         return True
+
+def temp_test():
+    contents = get_url('https://sharylattkisson.com/what-the-news-isnt-saying-about-vaccine-autism-studies/')
+
+    document_template = {"contents": contents, "query": '', "url": 'https://sharylattkisson.com/what-the-news-isnt-saying-about-vaccine-autism-studies/'}
+
+    parsed_document = pars.parse_document_regex_based_sentences(document_template)[0]
+
+def pre_load_models():
+    irrelevancy_module.pre_load_model('IrrelevancyModule/NOV19/saved_model.pkl')
+    tf_module.pre_load_model('TrueFalseModule/nn_fancy_78_saved_model.pkl')

@@ -5,7 +5,6 @@ import os
 import re
 from os.path import isfile, join
 
-import simplejson
 import regex_helpers
 import string_helpers as sh
 import json
@@ -85,15 +84,6 @@ def save_content(content, path):
     f.close()
 
 
-def whatisthis(s):
-    if isinstance(s, str):
-        print "ordinary string"
-    elif isinstance(s, unicode):
-        print "unicode string"
-    else:
-        print "not a string"
-
-
 def parse_document_tag_based(document):
     """
     Takes in a JSON object representing an HTML page, accesses its 'contents' tag, and parses the content. The content
@@ -101,14 +91,16 @@ def parse_document_tag_based(document):
     edge cases where certain content might not be accessible by considering only <p> tags.
 
     :param document: A JSON object representing the result of a google search
-    :return: A JSON object with the following additional properties added to the input: schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
-    representing the parsed contents of a website.
+    :return: A  tuple of the form (JSON object, boolean)
+    JSON object has the following additional properties added to the
+    input: schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    representing the parsed contents of a website. The boolean represents whether or not the document has more than
+    150 words.
     """
     document['authors'] = []
     document['links'] = []
     document['paragraphs'] = []
 
-    # print whatisthis(document["contents"])
     soup = BeautifulSoup(document['contents'], 'html.parser')
 
     pars = soup.find_all('p')
@@ -135,19 +127,11 @@ def parse_document_tag_based(document):
     num_pars = 0
 
     for element in pars:
-        # if not any(True for _ in element.children):
-        # for child in element.children:
-        #     print child.get_text().encode('utf-8')
-
         images = element.select('a[class*="image"], a[class*="pict"], a[class*="phot"]')
         for image in images:
             image.clear()
         text = element.get_text().encode('ascii', 'ignore')
 
-
-        # for child in element.children:
-        #     if child.name == "img":
-        #         child.clear()
         if (len(text.split(" ")) > 5):
             if not regex_helpers.check_text_for_garbage(text.lower(), regex_helpers.GARBAGE) and \
                     regex_helpers.check_ends_with_punctuation(text):
@@ -156,22 +140,9 @@ def parse_document_tag_based(document):
                 num_pars += 1
                 num_words += len(text.split(' '))
                 document['paragraphs'].append(text)
-                # print element.contents
-    # for tag in TAGS:
-    #     for tag1 in TAGS:
-    #         relevant = soup.select(tag + " " + tag1)
-    #         print relevant
-
-    # for par in pars:
-    #     print par
-    #
-    # text = soup.get_text()
-    # print text.encode('utf-8')
 
     if num_words < 100:
         return document, False
-
-    # print 'Number of paragraphs: ' + str(num_pars)
 
     return document, True
 
@@ -183,8 +154,11 @@ def parse_document_regex_based_paragraphs(document):
     more liberal
 
     :param document: A JSON object representing the result of a google search
-    :return: A JSON object with the following additional properties added to the input: schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
-    representing the parsed contents of a website.
+    :return: A  tuple of the form (JSON object, boolean)
+    JSON object has the following additional properties added to the
+    input: schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    representing the parsed contents of a website. The boolean represents whether or not the document has more than
+    150 words.
     """
     document['authors'] = []
     document['links'] = []
@@ -241,8 +215,6 @@ def parse_document_regex_based_paragraphs(document):
     if num_words < 150:
         return document, False
 
-    # print 'Number of paragraphs: ' + str(num_pars)
-
     return document, True
 
 
@@ -253,8 +225,11 @@ def parse_document_regex_based_sentences(document):
     more liberal
 
     :param document: A JSON object representing the result of a google search
-    :return: A JSON object with the following additional properties added to the input: schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
-    representing the parsed contents of a website.
+    :return: A  tuple of the form (JSON object, boolean)
+    JSON object has the following additional properties added to the
+    input: schema {'title': '', 'query': '', 'paragraphs': [], 'links': [], 'authors': []}
+    representing the parsed contents of a website. The boolean represents whether or not the document has more than
+    150 words.
     """
     document['authors'] = []
     document['links'] = []
@@ -278,10 +253,17 @@ def parse_document_regex_based_sentences(document):
     if soup.title:
         document['title'] = soup.title.get_text().encode('ascii', 'ignore')
     else:
-        h1s = soup.select('h1')
-        for h1 in h1s:
-            document['title'] = h1.get_text().encode('ascii', 'ignore')
-            break
+        title = soup.select('head title')
+
+        if title is not None:
+            for t in title:
+                document['title'] = t.get_text().encode('ascii', 'ignore')
+                break
+        else:
+            h1s = soup.select('h1')
+            for h1 in h1s:
+                document['title'] = h1.get_text().encode('ascii', 'ignore')
+                break
 
     generator = (element for element in body if
                  element.name != 'script' and element.name != 'img' and len(element.findChildren()) == 0)
@@ -302,9 +284,27 @@ def parse_document_regex_based_sentences(document):
                     regex_helpers.check_text_for_garbage(sentence, regex_helpers.GARBAGE) and \
                             len_sentence > 5:
                 document['paragraphs'].append(sentence)
-                # print sentence
-                # print ""
                 num_words += len_sentence
+
+    if document['paragraphs'] == []:
+        body = soup.select('*')
+        generator = (element for element in body if
+                     element.name != 'script' and element.name != 'img' and len(element.findChildren()) == 0)
+
+        for element in generator:
+            text = element.get_text().encode('ascii', 'ignore')
+
+            sentences = tokenizer.tokenize(text)
+
+            for sentence in sentences:
+                sentence = sh.remove_garbage(sentence)
+                len_sentence = len(sentence.split(' '))
+
+                if sentence != '' and regex_helpers.check_ends_with_punctuation(sentence) and not \
+                        regex_helpers.check_text_for_garbage(sentence, regex_helpers.GARBAGE) and \
+                                len_sentence > 5:
+                    document['paragraphs'].append(sentence)
+                    num_words += len_sentence
 
     if num_words < 150:
         return document, False

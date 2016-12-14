@@ -13,7 +13,7 @@ from sklearn.linear_model import SGDClassifier
 
 import cPickle
 
-
+MODEL = None
 
 def work_file(doc):
     '''
@@ -34,28 +34,37 @@ def work_file(doc):
         documents.append(sen)    
         
     total_doc = " ".join(documents)
-    toreturn = get_cosine_count_matrix([total_doc])
+    toreturn = get_cosine_count_matrix([total_doc], 'TrueFalseModule/vocab_file_fancy.txt')
     return toreturn
 
 
-
-
-def magic_fucnction2(jsonfile):
+def tf_classifier(jsonfile, model_path=""):
     '''
     Returns 1 if true
     Returns 0 if false
     '''
-    with open('nn_fancy_78_saved_model.pkl', 'rb') as fid:
-        model = cPickle.load(fid)
+    # global MODEL
+    # if MODEL is None:
+    #     with open(model_path, 'rb') as fid:
+    #         MODEL = cPickle.load(fid)
         
     X = work_file(jsonfile)
     
-    true = model.predict(X)
-    
+    true = MODEL.predict(X)
+
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     if true:
         return 1
     
     return 0
+
+
+def pre_load_model(model_path):
+    global MODEL
+
+    with open(model_path, 'rb') as fid:
+        MODEL = cPickle.load(fid)
+
 
 #Trial To check it works:
 '''
