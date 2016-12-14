@@ -9,16 +9,16 @@ import numpy as np
 from sklearn.cluster import AffinityPropagation
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import euclidean
-from sklearn.decomposition import PCA
-from sklearn.model_selection import ShuffleSplit
 from sklearn.svm import SVC
+from random import sample
+from scipy import stats
 
 # Split paragraphs by this token in order to easily retrieve them
 # from the document
 paragraph_splitter = "\n\n--\n\n"
 
 '''
-NOTE:
+NOTE
     The input data has to be parsed using the html parser AND processed
     by the preprocessor
 '''
@@ -57,11 +57,12 @@ def getDocuments(JSON_files):
     for json in JSON_files:
         paragraphs = json['paragraphs']
         label = json['actual-search-type']
+        title = json['title']
         document = ''
         for paragraph in paragraphs[:-1]:
             document += paragraph + paragraph_splitter
         document += paragraphs[-1]
-        all_documents.append((document, label))
+        all_documents.append((document, label, title))
     return all_documents
 
 def getTf(word, document):
@@ -190,14 +191,45 @@ def getNearestDocuments(target, documents):
 
     return documents_in_each_cluster[target_cluster_idx]
 
-def getNumSentences(documents):
+def getSentences(documents):
     '''
-    Given a list of documents, this function returns a list where
-    the list[i] = the number of sentences in the document in
-    documents[i]
+    Given a list of documents[i] = (document_i, label_i, title_i), this function
+    returns a list of sentences[i] = (sentence_i, label_i) where label_i
+    is the label of document_i iff sentence_i is a sentence in document_i
     '''
-    documents = makeBlobs(documents)
-    return [len(document.sentences) for document in documents]
+    sentences = []
+    for doc, label, title in documents:
+        doc = TextBlob(doc)
+        doc_sents = doc.sentences
+        for doc_sent in doc_sents:
+            sentences.append((doc_sent, label, title))
+    return sentences
+
+def makeSentenceVectors(all_sentences):
+    '''
+    Given a list of all sentences, this function returns a list of the sentences
+    in TF-ISF form
+    '''
+    only_sentences = [all_sentences[i][0] for i in range(len(all_sentences))]
+    sentence_vectors = []
+
+    max_length = -1 * float('inf')
+    max_idx = -1
+    for sent in only_sentences:
+        sent_vector = []
+        for word in sent.words:
+            tf_isf = getTfIdf(word, sent, only_sentences)
+            sent_vector.append(tf_isf)
+        if len(sent_vector) > max_length:
+            max_length = len(sent_vector)
+        sentence_vectors.append(np.array(sent_vector))
+
+    # Ensure that each tf-isf vector has the same dimensionality
+    # by padding with 0's
+    for i in range(len(sentence_vectors)):
+        sentence_vectors[i] = np.append(sentence_vectors[i], [0] * (max_length - len(sentence_vectors[i])))
+
+    return sentence_vectors
 
 def main(argv):
     '''
@@ -207,78 +239,133 @@ def main(argv):
     on the data in the input directory. The model will then be saved
     into a pickle file specified by the input arguments
     '''
-    # Check that the input arguments are valid
-    if not isValid(argv):
-        sys.exit(1)
+    for_moe = True # Bool to indicate if this is for moe running on server
+    if (for_moe):
+        with open ('tfidf_documents.pickle', 'r') as pic:
+            dox_label_title, document_vectors, labels = \
+                pickle.load(pic)
+    else:
+        # Check that the input arguments are valid
+        if not isValid(argv):
+            sys.exit(1)
 
-    # Load a list of the JSON files in the input dir
-    JSON_files = []
-    for filename in os.listdir(argv[0]):
-        with open(os.path.join(argv[0], filename), 'r') as json_file:
-            JSON_files.append(simplejson.load(json_file))
+        if(argv[0].split('.')[-1] == 'pickle'):
+            with open (argv[0], 'r') as pic:
+                dox_label_title, document_vectors, labels = \
+                    pickle.load(pic)
+        else:
+            # Load a list of the JSON files in the input dir
+            JSON_files = []
+            for filename in os.listdir(argv[0]):
+                with open(os.path.join(argv[0], filename), 'r') as json_file:
+                    JSON_files.append(simplejson.load(json_file))
 
-    # Get all the documents in the JSON files
-    documents_and_labels = getDocuments(JSON_files)
+            # Get all the documents in the JSON files
+            dox_label_title = getDocuments(JSON_files)
 
-    # Get all document vectors & the labels
-    document_vectors = makeDocumentVectors(documents_and_labels)
-    labels = [documents_and_labels[i][1] for i in range(len(documents_and_labels))]
+            # Get all document vectors & the labels
+            document_vectors = makeDocumentVectors(dox_label_title)
+            labels = [dox_label_title[i][1] for i in range(len(dox_label_title))]
+            name = 'processed_' + argv[1] + '.pickle'
+            with open(name, 'w') as pic:
+                pickle.dump((dox_label_title, document_vectors, labels) ,pic)
 
-    # Get the number of sentences in the documents
-    num_sentences = getNumSentences(documents_and_labels)
+    num_correct = 0
+    num_test_cases = 30
+    test_idxs = sample(range(0, len(document_vectors)), num_test_cases)
+    for i in range(num_test_cases):
+        # Get random test example and train data for it
+        test_idx = test_idxs[i]
+        test_dox_label_title = dox_label_title[test_idx]
+        test_document_vector = document_vectors[test_idx]
+        train_dox_label_title = dox_label_title[:test_idx] + dox_label_title[test_idx+1:]
+        train_document_vectors = document_vectors[:test_idx] + document_vectors[test_idx+1:]
 
-    # Keep track of the number of examples classified & the ones that were
-    # wrongly predicted
-    num_predictions = 0
-    num_wrong = 0
+        # Cluster the test document and get its nearest documents
+        nearest_neighbours_idxs = getNearestDocuments(test_document_vector, train_document_vectors)
+        nearest_dox_label_title = [train_dox_label_title[i] for i in nearest_neighbours_idxs]
 
-    # Shuffle and split the data
-    rs = ShuffleSplit(n_splits=1, train_size=0.8, test_size=0.2)
-    for train_idx, test_idx in rs.split(document_vectors):
-        # Get the training data
-        X_train = [document_vectors[i] for i in train_idx]
-        y_train = [labels[i] for i in train_idx]
+        '''
+        # Print the test article name and the names of the nearest nearest documents
+        print 'Test Document Name: ' + test_dox_label_title[-1].strip('\n')
+        for i in range(len(nearest_neighbours_idxs)):
+            print 'Nearest document #' + str(i) + ': ' + nearest_dox_label_title[i][-1].strip('\n')
+        '''
 
-        # Get the test data
-        X_test = [document_vectors[j] for j in test_idx]
-        y_test = [labels[j] for j in test_idx]
+        # Get the sentences & their labels (the document label) from the
+        # nearest_dox_label_title
+        nearest_sent_label_title = getSentences(nearest_dox_label_title)
+        train_sentence_vectors = makeSentenceVectors(nearest_sent_label_title)
 
-        # Get the number of sentences in each of the test examples
-        num_sentences_in_test = [num_sentences[i] for i in test_idx]
+        # Get a list where list[i] = vector_form_of_sentence_i for the
+        # test document
+        max_sent_length = -1*float('inf')
+        test_sentences_tfisf = []
+        test_doc_sentences = TextBlob(test_dox_label_title[0]).sentences
+        for sent in test_doc_sentences:
+            sent_vector = np.array([])
+            for word in sent.words:
+                word_tfisf = getTfIdf(word, sent, test_doc_sentences)
+                sent_vector = np.append(sent_vector, word_tfisf)
+            if len(sent_vector) > max_sent_length:
+                max_sent_length = len(sent_vector)
+            test_sentences_tfisf.append(sent_vector)
 
-        # Train a classifier for each test example
-        for test_ex_idx in range(len(X_test)):
-            # Get the test example and the number of sentences in it
-            test_example = X_test[test_ex_idx]
-            test_example_label = y_test[test_ex_idx]
-            num_sen = num_sentences_in_test[test_ex_idx]
+        # Make sure all sentence vectors have the same length by padding
+        for i in range(len(test_sentences_tfisf)):
+            test_sentences_tfisf[i] = np.append(test_sentences_tfisf[i], [0] * (max_sent_length - len(test_sentences_tfisf[i])))
 
-            # Use PCA to bring down the dimensionality of the training data
-            # to the number of sentences in this particular test example
-            # then reduce the test example
-            try:
-                pca = PCA(n_components = num_sen)
-                pca.fit(X_train)
-                X_train = pca.transform(X_train)
-                test_example = pca.transform(test_example)
-            except:
-                pca = PCA(n_components = 8)
-                pca.fit(X_train)
-                X_train = pca.transform(X_train)
-                test_example = pca.transform(test_example)
-            X_train = [X_train[i][:] for i in range(len(X_train))]
+        # Need to make sure all test sentences and all train sentences have the same length
+        larger_length = max(len(test_sentences_tfisf[0]), len(train_sentence_vectors[0]))
+        if len(test_sentences_tfisf[0]) > len(train_sentence_vectors[0]):
+            # pad the train vectors
+            for i in range(len(train_sentence_vectors)):
+                train_sentence_vectors[i] = np.append(train_sentence_vectors[i], [0] * (larger_length - len(train_sentence_vectors[i])))
+        elif len(train_sentence_vectors[0]) > len(test_sentences_tfisf[0]):
+            # pad the test
+            for i in range(len(test_sentences_tfisf)):
+                test_sentences_tfisf[i] = np.append(test_sentences_tfisf[i], [0] * (larger_length - len(test_sentences_tfisf[i])))
 
-            # Train a classifier and predict the label
-            clf = SVC(kernel='poly', degree=3)
-            clf.fit(X_train, y_train)
-            prediction = clf.predict(test_example)
-            num_predictions += 1
+        predictions = []
+        # Now we can get nearest sentences for each sentence in test sentence
+        for i in range(len(test_doc_sentences)):
+            test_sentence = test_doc_sentences[i]
+            test_sent_vector = test_sentences_tfisf[i]
 
-            if(prediction != test_example_label):
-                print 'WRONG'
-                num_wrong += 1
+            nearest_sentences_idxs = getNearestDocuments(test_sent_vector, train_sentence_vectors)
+            '''
+            print 'Test Sentence: ' + str(test_sentence)
+            for j in range(len(nearest_sentences_idxs)):
+                jth_nearest_sentence = nearest_sent_label_title[nearest_sentences_idxs[j]][0]
+                print 'Nearest sentences #' + str(j) + ': ' + str(jth_nearest_sentence)
+            '''
+            # Train a classifier on the sentences in the cluster which test_sentence
+            # falls into
+            clf = SVC(kernel="poly", degree=3)
+            train_sentences = [train_sentence_vectors[nearest_sentences_idxs[i]] for i in range(len(nearest_sentences_idxs))]
+            train_sent_labels = [nearest_sent_label_title[nearest_sentences_idxs[j]][1] for j in range(len(nearest_sentences_idxs))]
 
-    print float(num_wrong)/num_predictions
+            # If all of the sentences that fall into the same cluster have the same label,
+            # then the prediction should be that label
+            if(len(set(train_sent_labels)) <= 1):
+                prediction = train_sent_labels[0]
+            else:
+                clf.fit(train_sentences, train_sent_labels)
+                # predict the label for this sentence
+                prediction = clf.predict(test_sent_vector.reshape(1, -1))
+
+            print prediction,
+            print test_dox_label_title[1]
+            print '---'
+            predictions = np.append(predictions, prediction)
+
+        print 'Predicted document label: ' + str(stats.mode(predictions)[0][0])
+        print 'Actual document label: ' + str(test_dox_label_title[1])
+        if(stats.mode(predictions)[0][0] == test_dox_label_title[1]):
+            num_correct += 1
+
+    print "Classification accuracy: " + str(float(num_correct)/num_test_cases)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
