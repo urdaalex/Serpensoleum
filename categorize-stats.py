@@ -10,11 +10,23 @@ FOLDER = "./" + sys.argv[1] + "/"
 cat_dictionary = {"t":0,"n":0,"f":0}
 
 def load_document(path):
+    '''
+    Given a path to a JSON file, the json object is returned
+    
+    Attributes:
+        path (str): Path to JSON file
+    '''
     with open(path) as json_data:
         document = json.load(json_data)
     return document
 
 def listdir_path(d):
+    '''
+    List all files in a directory
+    
+    Attributes:
+        d (str): Directory.
+    '''
     return [os.path.join(d, f) for f in os.listdir(d)]
 
 def main():

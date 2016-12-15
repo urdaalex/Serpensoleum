@@ -1,3 +1,6 @@
+#Given a folder, it opens a link to each html result in your browser, and allows you to classify the page.
+#Example Usage:   python scriptName.py DIR
+
 import pprint
 import sys
 import urllib2
@@ -64,6 +67,12 @@ def get_category():
 
 
 def load_document(path):
+    '''
+    Given a path to a JSON file, the json object is returned
+    
+    Attributes:
+        path (str): Path to JSON file
+    '''
     with open(path) as json_data:
         document = json.load(json_data)
     return document

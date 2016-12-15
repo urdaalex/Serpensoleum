@@ -3,12 +3,23 @@ import os
 from measure_irrelevant import *
 
 def load_document(path):
+    '''
+    Load a document  and return as a JSON object
+    
+    Attributes:
+        path (str): Path of file to be loaded
+    '''
     with open(path) as json_data:
         document = json.load(json_data)
     return document
 
 def averagestuff(array):
+    '''
+    Given array return an array with the average values calculated
     
+    Attributes:
+        array (list): List of integers
+    '''    
     title = array[0]
     top1 = array[1]
     top5 = np.average(array[1:6])
@@ -45,6 +56,9 @@ def work_file(dir_file):
     return toreturn
 
 def make_arff_file():
+    '''
+    Create file to be trained on.
+    '''
     towrite = []
     
     dirs = ["/home/b/Documents/00490/Alex/csc490/data/parsed/VA/1/vaccines AND autism/",

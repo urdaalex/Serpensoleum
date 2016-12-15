@@ -8,7 +8,7 @@ import numpy as np
 def get_cosine_count_matrix(documents, vocab_fancy_file=""):
     '''
     Takes in an array of [doc1sens, doc2sens]
-    returns an array with 1 if word is there 0 if it's not for each
+    Returns an array with 1 if word is there 0 if it's not for each
     '''
     vectorizer = CountVectorizer(vocabulary=load_vocab(vocab_fancy_file))
     #vectorizer = TfidfVectorizer(vocabulary=load_vocab())
@@ -19,6 +19,12 @@ def get_cosine_count_matrix(documents, vocab_fancy_file=""):
     return occurence_matrix
 
 def load_vocab(vocab_fancy_file=""):
+    '''
+    Load vocabulary into a variable
+    
+    Attributes:
+        vocab_fancy_file (str): File from which to load the vocabulary.
+    '''
     lst = []
 
     if (vocab_fancy_file != ""):

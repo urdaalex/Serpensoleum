@@ -21,6 +21,9 @@ def getProcessedDocument(article_dict):
     the parsed article) with the stemmed version of those paragraphs
     (using the Lancaster Stemming Algorithm), and removes the stop
     words in the paragraphs.
+    
+    Attributes:
+        article_dict (dict): A webpage in dictionary format as retured by html_parser.py
     '''
     # Init the stemmer
     st = LancasterStemmer()
@@ -51,6 +54,10 @@ def spaceOutTxt(txt, sofar=0):
     Given txt that may or may not have punctuation, this
     function adds a space between punctuation and the character
     attached to it on either side
+
+    Attributes:
+        txt (str): Text to be spaced out.
+        sofar (int): 
     '''
     if(sofar == len(punctuation)-1):
         return txt
@@ -70,6 +77,9 @@ def removeStopWords(txt):
     '''
     Given a string input 'txt', this function removes all
     occurences of stop words in the text
+
+    Attributes:
+        txt (str): Input String to be processed.
     '''
     # Filter out the stop words
     filtered = [word for word in txt.split(' ') if word not in stopwords.words('english')]
@@ -84,6 +94,10 @@ def stemTxt(txt, st):
     '''
     Given a string input 'txt', this function stems the input
     using the stemmer specified by 'st'.
+
+    Attributes:
+        txt (str): Input text to be processed.
+        st (nltk.Stemmer): Stemmer to be used.
     '''
     # Stem the words in the txt
     stemmed_list = [st.stem(i) for i in txt.split(' ')]

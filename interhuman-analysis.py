@@ -1,3 +1,12 @@
+"""
+A tool that searches for classified websites that were classified more than once.
+Developed to find the interhuman analysis kappa value, as we need to use sites that were 
+overlapped between raters.
+
+Usage: python NAME.py DIR
+
+"""
+
 import pprint
 import sys
 import urllib2
@@ -38,10 +47,22 @@ def main():
 			print(" [t,f,n]:" + str(v))
 		
 def listdir_path(d):
+    '''
+    Given a directory list all of the files in given directory
+
+    Attributes:
+        d (str): path to a directory.
+    '''
     return [os.path.join(d, f) for f in os.listdir(d)]
 
 
 def load_document(path):
+    '''
+    Given a path to a JSON file, the json object is returned
+    
+    Attributes:
+        path (str): Path to JSON file
+    '''
     with open(path) as json_data:
         document = json.load(json_data)
     return document

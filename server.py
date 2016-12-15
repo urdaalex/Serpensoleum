@@ -8,6 +8,12 @@ IRRELEVANT = 10
 
 class MyServer(web.application):
     def run(self, port=8080, *middleware):
+        '''Run the server.
+        
+        Args:
+            self (MyServer): Takes in a server object.
+            port (int): Which port should the server be run on.
+        '''
         func = self.wsgifunc(*middleware)
         return web.httpserver.runsimple(func, ('127.0.0.1', port))
 

@@ -26,11 +26,24 @@ dependency_parser = StanfordDependencyParser(path_to_jar=path_to_jar, path_to_mo
 
 
 def get_dep_for_sent(sent="Marijuna is not healthy"):
+    '''
+    Given a sentence return the depency tree for it. If no sentence is provided, a template one is used.
+    
+    Attributes:
+        sent (str): Input sentence.
+    '''
     result = dependency_parser.raw_parse(sent.lower())
     dep = result.next()
     return list(dep.triples())    
 
 def look_for_dep_tag(lst, tag):
+    '''
+    Looks for tag in lst.
+    
+    Attributes:
+        lst (List): List of Dependencies.
+        tag (str): Tag.
+    '''
     nlst = []
     for trip in lst:
         if trip[1] == tag:
@@ -40,6 +53,12 @@ def look_for_dep_tag(lst, tag):
     return nlst
 
 def doc_to_dict(doc):
+    '''
+    Given a document it produces a dictionary of {sentence:dependency}
+    
+    Attributes:
+        doc (str): Entire document as string
+    '''
     #doc_dict is in form {sent:dep}
     doc_dict = {}
     for line in doc.split("\n"):
@@ -49,6 +68,13 @@ def doc_to_dict(doc):
     return doc_dict
 
 def conflict(sent1,sent2):
+    '''
+    Given two sentences see if there is a conflict
+    
+    Attributes:
+        sent1 (str): Sentence 1.
+        sent2 (str): Sentence 2.
+    '''
     dobjs1 = look_for_dep_tag(sent1,"dobj")
     dobjs2 = look_for_dep_tag(sent2,"dobj")
     check_neg = []
@@ -83,6 +109,13 @@ def conflict(sent1,sent2):
     return False
 
 def conflict2(sent1,sent2):
+    '''
+    Given two sentences see if there is a conflict. (Alternate algorithm)
+    
+    Attributes:
+        sent1 (str): Sentence 1.
+        sent2 (str): Sentence 2.
+    '''
     neg1 = look_for_dep_tag(sent1,"neg")
     neg2 = look_for_dep_tag(sent2,"neg")    
     bools = None
@@ -102,6 +135,14 @@ def conflict2(sent1,sent2):
     return False
 
 def conflict2_sub(sent1,sent2, neg):
+    '''
+    Helper Function of the alternate algorithm.
+    
+    Attributes:
+        sent1 (str): Sentence 1.
+        sent2 (str): Sentence 2.
+        neg (tuple): dependcy tag of negation
+    '''
     negated = neg[0]
 
     t1_trips = []
