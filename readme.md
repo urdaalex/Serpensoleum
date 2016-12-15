@@ -60,6 +60,18 @@ JSON data will get written to the specified output folder in the same format
 as parser.py
 
 ```
+clustering_approach.py [ <empty> || INPUT_FOLDER_NAME || INPUT_PICKLE_NAME]
+```
+* This program will apply the clustering approach described in the paper
+to either
+    - JSON files in INPUT_FOLDER_NAME (must be parsed and preprocessed) or,
+    - INPUT_PICKLE_NAME which will contain a pickle of tf_idf vectors
+* **NOTE** Currently the program won't do anything with any inputs, it's
+hardcoded to run the approach on the 'tfidf_documents.pickle' file (this saves
+time since these documents are already processed, parsed, and in
+tf-idf form)
+
+```
 Dependency.py
 ```
 
