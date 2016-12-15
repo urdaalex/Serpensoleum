@@ -3,3 +3,8 @@ The model can be found at:
 https://drive.google.com/open?id=0B9r2DdpWsZZbV3NldU1sT3FGejA
 
 (Too big to upload to github. ~250mb)
+
+
+Instructions:
+-----------------------------------------------------------------
+`tf_classifier` in **magic_function.py** is the function which is used to run the classification.
