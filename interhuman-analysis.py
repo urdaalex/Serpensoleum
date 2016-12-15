@@ -1,3 +1,12 @@
+"""
+A tool that searches for classified websites that were classified more than once.
+Developed to find the interhuman analysis kappa value, as we need to use sites that were 
+overlapped between raters.
+
+Usage: python NAME.py DIR
+
+"""
+
 import pprint
 import sys
 import urllib2

@@ -1,3 +1,6 @@
+#Given a folder, it opens a link to each html result in your browser, and allows you to classify the page.
+#Example Usage:   python scriptName.py DIR
+
 import pprint
 import sys
 import urllib2
