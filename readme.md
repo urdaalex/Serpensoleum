@@ -1,3 +1,6 @@
+## Paper
+Read it [here](https://github.com/urdaalex/Serpensoleum/blob/master/Serpensoleum%20Paper.pdf)
+
 ## Dependencies
 
 1. pip install --upgrade google-api-python-client
